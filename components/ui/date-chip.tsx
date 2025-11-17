@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import AppChip from './chip';
-import { DatePicker } from './date-picker';
+import BaseChip from './base/chip';
+import { BaseDateTimePicker } from './base/date-picker';
 
 
 export default function DateChip() : React.ReactNode {
@@ -31,12 +31,12 @@ export default function DateChip() : React.ReactNode {
 
     return (
         <View>
-            <AppChip
+            <BaseChip
                 text={date.toDateString() === new Date().toDateString() ? "Today" : formatDate(date)}
                 onPress={onPress}
-                className='rounded-3xl bg-white self-start'
+                className='rounded-l bg-transparent self-start border-black border-[0.1]'
             />
-            <DatePicker
+            <BaseDateTimePicker
                 mode="date"
                 date={date}
                 onChange={onChange}

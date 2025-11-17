@@ -1,10 +1,10 @@
-// DatePicker component, allows user to pick date and time
+// DateTimePicker component, allows user to pick date and time
 // Can be used with other components to give them ability to pick date and time
 
 import SafeAreaWrapper from '@/components/safe-area-wrapper';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
-interface DatePickerProps {
+interface DateTimePickerProps {
   mode: 'date' | 'time';
   date: Date;
   onChange: (event: DateTimePickerEvent, selectedDate: Date | undefined) => void;
@@ -12,7 +12,7 @@ interface DatePickerProps {
   disableFutureDates?: boolean;
 }
 
-export const DatePicker = ({ mode, date, onChange, show, disableFutureDates } : DatePickerProps) => {
+export const BaseDateTimePicker = ({ mode, date, onChange, show, disableFutureDates } : DateTimePickerProps) => {
 
   return (
     <SafeAreaWrapper>

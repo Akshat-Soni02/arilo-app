@@ -5,11 +5,12 @@ interface Props {
     className?: string;
 }
 
+// add flex 1 while using for pages to cover entire page
+
 export default function SafeAreaWrapper({ children, className }: Props) : React.ReactNode {
     return (
         <SafeAreaView
             edges={["top", "left", "right"]}
-            style={{ flex: 1 }}
             className={className || ''}
         >
             {children}

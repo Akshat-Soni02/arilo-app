@@ -13,7 +13,7 @@ interface Props {
     text?: string;
 }
 
-export default function AppChip({ children, className, onPress, icon, disabled, selected, text }: Props) {
+export default function BaseChip({ children, className, onPress, icon, disabled, selected, text }: Props) {
     return (
         <Chip icon={icon} onPress={onPress} disabled={disabled} selected={selected} style={tw`${className || ''}`}>
             {text || children}
