@@ -17,7 +17,7 @@ export default function SegmentedButtonsBoxedTwo ({options, selectedValue, onVal
           { ...options[0], checkedColor: "bg-white shadow", uncheckedColor: "bg-blue-200" },
           { ...options[1], checkedColor: "bg-white shadow", uncheckedColor: "bg-blue-200" }
       ]}
-      containerClassName="bg-yellow-200 rounded-lg h-fit w-fit"
+      containerClassName="bg-yellow-200 rounded-lg items-center"
     />
   );
 }

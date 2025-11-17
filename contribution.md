@@ -18,5 +18,12 @@ Before raising a ***Pull Request***, pull changes from development
 - Any base component should be named as ***BaseComponent*** [Ex - BaseButton, BaseChip]
 - Imports should be relative ex - @/Components/compo
 
+**General**
+
+- Keep adding commands for specific installs/setups in readme
+- Keep adding readme instructions in readme file whenever are required
+- Keep libraries info in libraries.md updated
+- Once a functionality's circle is completed, add tests related to them
+
 
 

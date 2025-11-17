@@ -29,7 +29,7 @@ export default function BaseSegmentedButtons({ value, onValueChange, buttons, co
       ...button,
       checkedColor: button.checkedColor ? tw`${button.checkedColor}`.color?.toString() : undefined,
       uncheckedColor: button.uncheckedColor ? tw`${button.uncheckedColor}`.color?.toString() : undefined,
-      style: button.style ? [tw`${button.style}`] : tw`p-0`,
+      style: button.style ? [tw`${button.style}`] : undefined,
       labelStyle: tw`text-black`
     }));
   }, [buttons]);
