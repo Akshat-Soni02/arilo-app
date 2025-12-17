@@ -2,7 +2,6 @@
 
 import SafeAreaWrapper from "@/components/safe-area-wrapper";
 import DateChip from "@/components/ui/date-chip";
-import SegmentedButtonsBoxedTwo from "@/components/ui/segmented-buttons-boxed-two";
 import { useState } from "react";
 
 export default function HomePage() {
@@ -11,7 +10,7 @@ export default function HomePage() {
   return (
     <SafeAreaWrapper className="bg-red-300 flex-1">
       <DateChip />
-      <SegmentedButtonsBoxedTwo selectedValue={activeTab} onValueChange={setActiveTab} options={[{value: "view1", label: "view1"}, {value: "view2", label: "view2"}]}/>
+      {/* <SegmentedButtonsBoxedTwo selectedValue={activeTab} onValueChange={setActiveTab} options={[{value: "view1", label: "view1"}, {value: "view2", label: "view2"}]}/> */}
     </SafeAreaWrapper>
   );
 }
