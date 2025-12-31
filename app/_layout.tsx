@@ -12,23 +12,22 @@ import 'react-native-reanimated';
 import "../global.css";
 
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '../hooks/use-color-scheme';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: '(drawer)',
 };
 
 
 function StackScreens() {
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+      <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
     </Stack>
   );
 }
 
-function ProviderWrapper({ children } : { children: React.ReactNode }): React.ReactNode {
+function ProviderWrapper({ children }: { children: React.ReactNode }): React.ReactNode {
   const colorScheme = useColorScheme();
 
   const CombinedDefaultTheme = {
@@ -48,12 +47,12 @@ function ProviderWrapper({ children } : { children: React.ReactNode }): React.Re
   };
 
   const paperTheme = colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme;
-    return (
+  return (
     <ThemeProvider value={colorScheme === 'dark' ? NavDarkTheme : NavDefaultTheme}>
       <PaperProvider theme={paperTheme}>
-      <SafeAreaProvider>
-        {children}
-      </SafeAreaProvider>
+        <SafeAreaProvider>
+          {children}
+        </SafeAreaProvider>
       </PaperProvider>
     </ThemeProvider>
   );

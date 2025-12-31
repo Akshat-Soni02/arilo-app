@@ -1,16 +1,17 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 interface Props {
     children: React.ReactNode;
     className?: string;
+    edges?: Edge[];
 }
 
 // add flex 1 while using for pages to cover entire page
 
-export default function SafeAreaWrapper({ children, className }: Props) : React.ReactNode {
+export default function SafeAreaWrapper({ children, className, edges = ["top", "left", "right"] }: Props): React.ReactNode {
     return (
         <SafeAreaView
-            edges={["top", "left", "right"]}
+            edges={edges}
             className={className || ''}
         >
             {children}
