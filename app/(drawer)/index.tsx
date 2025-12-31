@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import DrawerMenu from '../../components/drawer-menu';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
@@ -14,9 +15,9 @@ export default function Home() {
                 <Text variant="headlineMedium" className="font-bold">Home Screen</Text>
             </View>
 
-            <View className="absolute bottom-10 items-center w-full">
+            <TouchableOpacity className="absolute bottom-10 items-center w-full" onPress={() => router.push('/record-screen')}>
                 <RecordBtn />
-            </View>
+            </TouchableOpacity>
 
         </SafeAreaWrapper>
     );

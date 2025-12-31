@@ -23,6 +23,7 @@ function StackScreens() {
   return (
     <Stack>
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+      <Stack.Screen name="record-screen" options={{ headerShown: false }} />
     </Stack>
   );
 }
