@@ -6,8 +6,21 @@ module.exports = {
     "./components/**/*.{js,jsx,ts,tsx}",
   ],
   presets: [require("nativewind/preset")],
+  darkMode: "class",
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        background: "var(--color-background)",
+        btnHighlight: "var(--color-btn-highlight)",
+        surface: "var(--color-surface)",
+        "surface-mint": "var(--color-surface-mint)",
+        primary: "var(--color-primary)",
+        "text-main": "var(--color-text)",
+        "text-muted": "var(--color-text-muted)",
+        border: "var(--color-border)",
+        accent: "var(--color-accent)",
+      },
+    },
   },
   plugins: [],
 };

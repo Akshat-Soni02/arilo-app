@@ -3,8 +3,8 @@ import { View } from 'react-native';
 
 export default function RecordBtn() {
     return (
-        <View className="p-4 rounded-full bg-gray-200">
-            <Ionicons name="mic" size={24} color="black" />
+        <View className="p-4 rounded-full bg-btnHighlight box-shadow">
+            <Ionicons name="mic" size={28} color="#F5F2E9" />
         </View>
     )
 }

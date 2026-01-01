@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { palette } from '../constants/colors';
 
 
 import 'react-native-reanimated';
@@ -31,11 +32,20 @@ function StackScreens() {
 function ProviderWrapper({ children }: { children: React.ReactNode }): React.ReactNode {
   const colorScheme = useColorScheme();
 
+  const themeColors = colorScheme === 'dark' ? palette.dark : palette.light;
+
   const CombinedDefaultTheme = {
     ...MD3LightTheme,
     colors: {
       ...MD3LightTheme.colors,
       ...NavDefaultTheme.colors,
+      primary: themeColors.primary,
+      btnHighlight: themeColors.btnHighlight,
+      background: themeColors.background,
+      surface: themeColors.surface,
+      outline: themeColors.border,
+      text: themeColors.text,
+      // Add other Paper-specific color mappings here
     },
   };
 
@@ -44,6 +54,12 @@ function ProviderWrapper({ children }: { children: React.ReactNode }): React.Rea
     colors: {
       ...MD3DarkTheme.colors,
       ...NavDarkTheme.colors,
+      primary: themeColors.primary,
+      btnHighlight: themeColors.btnHighlight,
+      background: themeColors.background,
+      surface: themeColors.surface,
+      outline: themeColors.border,
+      text: themeColors.text,
     },
   };
 

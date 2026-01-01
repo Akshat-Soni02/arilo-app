@@ -8,11 +8,11 @@ import RecordBtn from '../../components/ui/record-btn';
 
 export default function Home() {
     return (
-        <SafeAreaWrapper className="flex-1 bg-white">
+        <SafeAreaWrapper className="flex-1 bg-background">
             <DrawerMenu />
 
             <View className="flex-1 items-center justify-center -mt-10">
-                <Text variant="headlineMedium" className="font-bold">Home Screen</Text>
+                <Text variant="headlineMedium" className="font-bold">Coming Soon</Text>
             </View>
 
             <TouchableOpacity className="absolute bottom-10 items-center w-full" onPress={() => router.push('/record-screen')}>
