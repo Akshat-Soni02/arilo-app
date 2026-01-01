@@ -1,3 +1,5 @@
+import { platformSelect } from "nativewind/theme";
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -19,6 +21,15 @@ module.exports = {
         "text-muted": "var(--color-text-muted)",
         border: "var(--color-border)",
         accent: "var(--color-accent)",
+      },
+      fontFamily: {
+        system: platformSelect({
+          ios: "Georgia",
+          android: "sans-serif",
+          default: "ui-sans-serif",
+        }),
+        inter: ["Inter"],
+        "inter-bold": ["Inter-Bold"],
       },
     },
   },

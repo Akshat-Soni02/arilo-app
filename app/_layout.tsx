@@ -13,7 +13,12 @@ import 'react-native-reanimated';
 import "../global.css";
 
 
+import { Inter_400Regular, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { useColorScheme } from '../hooks/use-color-scheme';
+
+SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   anchor: '(drawer)',
@@ -76,6 +81,25 @@ function ProviderWrapper({ children }: { children: React.ReactNode }): React.Rea
 }
 
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Inter: Inter_400Regular,
+    'Inter-Bold': Inter_700Bold,
+  });
+
+  useEffect(() => {
+    if (error) throw error;
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
   return (
     <ProviderWrapper>
       <StackScreens />
