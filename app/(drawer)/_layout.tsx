@@ -1,133 +1,114 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { router } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
+import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { palette } from '../../constants/colors';
 
-function CustomDrawerContent(props: any) {
-    const insets = useSafeAreaInsets();
-    const { state } = props;
-    const activeRouteName = state.routeNames[state.index];
+const CustomDrawerContent = (props: any) => {
+    const { bottom } = useSafeAreaInsets();
+    const currentRoute = props.state.routes[props.state.index].name;
 
     const menuItems = [
-        { name: 'index', label: 'Home', icon: 'home-outline', activeIcon: 'home' },
-        { name: 'task', label: 'Tasks', icon: 'list-outline', activeIcon: 'list' },
-        { name: 'organize', label: 'Organize', icon: 'grid-outline', activeIcon: 'grid' },
-        { name: 'setting', label: 'Settings', icon: 'settings-outline', activeIcon: 'settings' },
-        { name: 'privacy', label: 'Privacy', icon: 'lock-closed-outline', activeIcon: 'lock-closed' },
+        { label: 'Organize', icon: 'folder-outline', route: 'index' },
+        { label: 'Tasks', icon: 'checkbox-outline', route: 'tasks' },
+        { label: 'Strong Query', icon: 'search-outline', route: 'query' },
+    ];
+
+    const bottomItems = [
+        { label: 'Settings', icon: 'settings-outline', route: 'settings' },
+        { label: 'Privacy', icon: 'document-text-outline', route: 'privacy' },
     ];
 
     return (
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
-            {/* Header / Logo Section */}
-            <View style={{ paddingTop: insets.top + 20, paddingHorizontal: 20, marginBottom: 20 }}>
-                <Text variant="headlineSmall" className="font-bold text-blue-600">Arilo</Text>
-            </View>
-
+        <View className="flex-1 bg-background">
             <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
-                {menuItems.map((item) => {
-                    const isActive = activeRouteName === item.name;
-                    return (
+                {/* Header / Quick Search */}
+                <View className="px-6 pt-12 pb-6">
+                    <View className="bg-quickSearchBg rounded-full h-12 flex-row items-center px-4">
+                        <Ionicons name="search-outline" size={20} color={palette.light.textMuted} />
+                        <Text className="text-gray-500 font-medium ml-2">Quick Search</Text>
+                    </View>
+                </View>
+
+                {/* Main Menu Items */}
+                <View className="px-2">
+                    {menuItems.map((item) => (
                         <TouchableOpacity
-                            key={item.name}
-                            onPress={() => router.push((item.name === 'index' ? '/' : `/${item.name}`) as any)}
-                            className={`flex-row items-center mx-3 my-1 p-3 rounded-xl ${isActive ? 'bg-blue-50' : 'bg-transparent'}`}
+                            key={item.label}
+                            className={`flex-row items-center px-4 py-3 mb-1 rounded-xl ${currentRoute === item.route ? 'bg-secondary' : 'transparent'}`}
+                            onPress={() => router.navigate(item.route)}
                         >
-                            <Ionicons
-                                name={(isActive ? item.activeIcon : item.icon) as any}
-                                size={22}
-                                color={isActive ? '#3b82f6' : '#6b7280'}
-                            />
-                            <Text
-                                variant="bodyLarge"
-                                className={`ml-4 font-medium ${isActive ? 'text-blue-600' : 'text-gray-600'}`}
-                            >
-                                {item.label}
-                            </Text>
+                            <Ionicons name={item.icon as any} size={22} color={palette.light.text} />
+                            <Text variant="bodyLarge" className="ml-4 font-medium text-text">{item.label}</Text>
+                            {/* Right Icon for top items */}
+                            <View className="flex-1 items-end">
+                                <Ionicons name={item.icon === 'folder-outline' ? 'albums-outline' : item.icon === 'checkbox-outline' ? 'list-outline' : 'search'} size={18} color={palette.light.text} />
+                            </View>
                         </TouchableOpacity>
-                    );
-                })}
+                    ))}
+                </View>
+
+                {/* Divider */}
+                <View className="h-[1px] bg-border mx-6 my-4" />
+
+                {/* Bottom Menu Items */}
+                <View className="px-2">
+                    {bottomItems.map((item) => (
+                        <TouchableOpacity
+                            key={item.label}
+                            className={`flex-row items-center px-4 py-3 mb-1 rounded-xl`}
+                            onPress={() => router.navigate(item.route)}
+                        >
+                            <Ionicons name={item.icon as any} size={22} color={palette.light.text} />
+                            <Text variant="bodyLarge" className="ml-4 font-medium text-text">{item.label}</Text>
+                            <View className="flex-1 items-end">
+                                <Ionicons name={item.icon === 'settings-outline' ? 'cog-outline' : 'file-tray-full-outline'} size={18} color={palette.light.text} />
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
             </DrawerContentScrollView>
 
-            {/* Bottom Profile Section */}
-            <TouchableOpacity
-                onPress={() => router.push('/profile')}
-                style={{
-                    paddingBottom: insets.bottom + 20,
-                    paddingTop: 16,
-                    paddingHorizontal: 16,
-                    borderTopWidth: 1,
-                    borderTopColor: '#f3f4f6',
-                    flexDirection: 'row',
-                    alignItems: 'center'
-                }}
-            >
-                <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center">
-                    <Ionicons name="person" size={24} color="#3b82f6" />
+            {/* Profile Footer */}
+            <View className="px-6 pb-6 pt-4 border-t border-border flex-row items-center justify-between" style={{ marginBottom: bottom }}>
+                <View className="flex-row items-center">
+                    <View className="h-10 w-10 rounded-full bg-surface items-center justify-center mr-3">
+                        <Ionicons name="person-outline" size={20} color={palette.light.text} />
+                    </View>
+                    <Text variant="titleMedium" className="font-semibold text-text">Name</Text>
                 </View>
-                <View className="ml-4 flex-1">
-                    <Text variant="bodyLarge" className="font-bold">Akshat Soni</Text>
-                    <Text variant="bodySmall" className="text-gray-500">View Profile</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
-            </TouchableOpacity>
+                <Ionicons name="ellipsis-horizontal" size={20} color={palette.light.textMuted} />
+            </View>
         </View>
     );
-}
+};
 
 export default function DrawerLayout() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Drawer
                 drawerContent={(props) => <CustomDrawerContent {...props} />}
-                screenOptions={{ headerShown: false }}
+                screenOptions={{
+                    headerShown: false,
+                    drawerType: 'slide',
+                    drawerStyle: {
+                        width: '80%',
+                    },
+                    overlayColor: 'rgba(0,0,0,0.5)',
+                }}
             >
-                <Drawer.Screen
-                    name="index"
-                    options={{
-                        drawerLabel: 'Home',
-                        title: 'Project X',
-                    }}
-                />
-                <Drawer.Screen
-                    name="task"
-                    options={{
-                        drawerLabel: 'Tasks',
-                        title: 'Task',
-                    }}
-                />
-                <Drawer.Screen
-                    name="organize"
-                    options={{
-                        drawerLabel: 'Organize',
-                        title: 'Organize',
-                    }}
-                />
-                <Drawer.Screen
-                    name="setting"
-                    options={{
-                        drawerLabel: 'Settings',
-                        title: 'Setting',
-                    }}
-                />
-                <Drawer.Screen
-                    name="privacy"
-                    options={{
-                        drawerLabel: 'Privacy',
-                        title: 'Privacy',
-                    }}
-                />
-                <Drawer.Screen
-                    name="profile"
-                    options={{
-                        drawerLabel: 'Profile',
-                        title: 'Profile',
-                        drawerItemStyle: { display: 'none' }
-                    }}
-                />
+                <Drawer.Screen name="index" />
+                {/* Define other screens to avoid navigation errors, even if they render the same component for now */}
+                <Drawer.Screen name="tasks" options={{ drawerItemStyle: { display: 'none' } }} />
+                <Drawer.Screen name="query" options={{ drawerItemStyle: { display: 'none' } }} />
+                <Drawer.Screen name="settings" options={{ drawerItemStyle: { display: 'none' } }} />
+                <Drawer.Screen name="privacy" options={{ drawerItemStyle: { display: 'none' } }} />
             </Drawer>
         </GestureHandlerRootView>
     );

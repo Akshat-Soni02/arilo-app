@@ -21,6 +21,13 @@ module.exports = {
         "text-muted": "var(--color-text-muted)",
         border: "var(--color-border)",
         accent: "var(--color-accent)",
+        visualizerBase: "var(--color-visualizer-base)",
+        visualizerActive: "var(--color-visualizer-active)",
+        stopBtn: "var(--color-stop-btn)",
+        quickSearchBg: "var(--color-quick-search-bg)",
+        cardUserBg: "var(--color-card-user-bg)",
+        cardAssistantBg: "var(--color-card-assistant-bg)",
+        chipToday: "var(--color-chip-today)",
       },
       fontFamily: {
         system: platformSelect({
