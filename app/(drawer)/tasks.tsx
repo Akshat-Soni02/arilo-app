@@ -1,0 +1,272 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, TextInput, TouchableOpacity, View } from 'react-native';
+import { Text } from 'react-native-paper';
+import DrawerMenu from '../../components/drawer-menu';
+import SafeAreaWrapper from '../../components/safe-area-wrapper';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { deleteTask, fetchTasks, Task, TaskStatus, updateTask } from '../../store/slices/taskSlice';
+
+export default function TaskScreen() {
+    const dispatch = useAppDispatch();
+    const { tasks, loading, error } = useAppSelector((state) => state.tasks);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
+    useEffect(() => {
+        loadTasks();
+    }, []);
+
+    const loadTasks = () => {
+        dispatch(fetchTasks(undefined));
+    };
+
+    const handleStatusToggle = async (task: Task) => {
+        const newStatus: TaskStatus = task.status === 'DONE' ? 'IN_PROGRESS' : 'DONE';
+        dispatch(updateTask({ taskId: task.id, updates: { status: newStatus } }));
+    };
+
+    const handleDeleteTask = async (taskId: string) => {
+        dispatch(deleteTask(taskId));
+    };
+
+    const formatTime = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    };
+
+    const isSameDay = (date1: Date, date2: Date) => {
+        return date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate();
+    };
+
+    const getDateLabel = (date: Date) => {
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (isSameDay(date, today)) {
+            return 'Today';
+        } else if (isSameDay(date, yesterday)) {
+            return 'Yesterday';
+        } else {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+    };
+
+    const goToPreviousDay = () => {
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() - 1);
+        setSelectedDate(newDate);
+    };
+
+    const goToNextDay = () => {
+        const today = new Date();
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() + 1);
+
+        // Don't allow going beyond today
+        if (newDate <= today) {
+            setSelectedDate(newDate);
+        }
+    };
+
+    const isToday = () => {
+        return isSameDay(selectedDate, new Date());
+    };
+
+    // Filter tasks based on search query and selected date
+    const filteredBySearch = tasks.filter(task =>
+        task.task.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredByDate = filteredBySearch.filter(task => {
+        const taskDate = new Date(task.createdAt);
+        return isSameDay(taskDate, selectedDate);
+    });
+
+    // Separate tasks by status
+    const inProgressTasks = filteredByDate.filter(task => task.status === 'IN_PROGRESS');
+    const doneTasks = filteredByDate.filter(task => task.status === 'DONE');
+
+    // Combine with IN_PROGRESS first, then DONE
+    const organizedTasks = [...inProgressTasks, ...doneTasks];
+
+    const renderTask = ({ item }: { item: Task }) => {
+        const isDone = item.status === 'DONE';
+
+        return (
+            <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+                <View className="flex-row items-center">
+                    {/* Checkbox */}
+                    <TouchableOpacity
+                        onPress={() => handleStatusToggle(item)}
+                        className="mr-3"
+                        activeOpacity={0.7}
+                    >
+                        <View
+                            className={`w-6 h-6 rounded-lg border-2 items-center justify-center ${isDone ? 'bg-orange-500 border-orange-500' : 'border-gray-300'
+                                }`}
+                        >
+                            {isDone && <Ionicons name="checkmark" size={16} color="white" />}
+                        </View>
+                    </TouchableOpacity>
+
+                    {/* Task Content */}
+                    <View className="flex-1 mr-3">
+                        <Text
+                            variant="bodyLarge"
+                            className="text-gray-800 mb-1"
+                            style={{
+                                textDecorationLine: isDone ? 'line-through' : 'none',
+                                opacity: isDone ? 0.5 : 1,
+                                color: isDone ? '#9CA3AF' : '#1F2937',
+                            }}
+                        >
+                            {item.task}
+                        </Text>
+                        <Text variant="bodySmall" className="text-gray-500">
+                            {formatTime(item.createdAt)}
+                        </Text>
+                    </View>
+
+                    {/* Delete Button */}
+                    <TouchableOpacity
+                        onPress={() => handleDeleteTask(item.id)}
+                        className="p-2"
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
+
+    const renderEmptyState = () => (
+        <View className="flex-1 items-center justify-center py-12">
+            <Ionicons name="checkbox-outline" size={64} color="#9CA3AF" />
+            <Text variant="titleMedium" className="text-gray-500 mt-4">
+                No tasks found
+            </Text>
+            <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8">
+                {searchQuery
+                    ? 'Try a different search term'
+                    : `No tasks for ${getDateLabel(selectedDate)}`}
+            </Text>
+        </View>
+    );
+
+    const taskCount = organizedTasks.length;
+
+    return (
+        <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
+            {/* Header */}
+            <View className="px-4 py-3 flex-row items-center justify-between bg-white border-b border-gray-100">
+                <DrawerMenu />
+                <TouchableOpacity onPress={loadTasks} className="p-2">
+                    <Ionicons name="refresh" size={24} color="#6B7280" />
+                </TouchableOpacity>
+            </View>
+
+            {/* Search Bar */}
+            <View className="px-4 py-3 bg-white">
+                <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
+                    <Ionicons name="search" size={20} color="#9CA3AF" />
+                    <TextInput
+                        placeholder="Search tasks..."
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        className="flex-1 ml-2 text-gray-800"
+                        placeholderTextColor="#9CA3AF"
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchQuery('')}>
+                            <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+
+            {/* Date Navigation */}
+            <View className="px-4 py-3 bg-white border-b border-gray-100">
+                <View className="flex-row items-center justify-between">
+                    <TouchableOpacity
+                        onPress={goToPreviousDay}
+                        className="p-2"
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons name="chevron-back" size={24} color="#6B7280" />
+                    </TouchableOpacity>
+
+                    <View className="items-center">
+                        <Text variant="titleLarge" className="text-gray-800 font-bold">
+                            {getDateLabel(selectedDate)}
+                        </Text>
+                        <Text variant="bodySmall" className="text-orange-500 font-medium">
+                            {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={goToNextDay}
+                        className="p-2"
+                        activeOpacity={0.7}
+                        disabled={isToday()}
+                    >
+                        <Ionicons
+                            name="chevron-forward"
+                            size={24}
+                            color={isToday() ? '#D1D5DB' : '#6B7280'}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Content */}
+            {error ? (
+                <View className="flex-1 items-center justify-center px-8">
+                    <Ionicons name="alert-circle" size={64} color="#EF4444" />
+                    <Text variant="titleMedium" className="text-gray-800 mt-4 text-center">
+                        Failed to load tasks
+                    </Text>
+                    <Text variant="bodyMedium" className="text-gray-500 mt-2 text-center">
+                        {error}
+                    </Text>
+                    <TouchableOpacity
+                        onPress={loadTasks}
+                        className="mt-6 bg-orange-500 px-6 py-3 rounded-xl"
+                    >
+                        <Text variant="bodyLarge" className="text-white font-medium">
+                            Try Again
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : loading ? (
+                <View className="flex-1 items-center justify-center">
+                    <ActivityIndicator size="large" color="#F97316" />
+                    <Text variant="bodyMedium" className="text-gray-500 mt-4">
+                        Loading tasks...
+                    </Text>
+                </View>
+            ) : (
+                <View className="flex-1">
+                    <FlatList
+                        data={organizedTasks}
+                        renderItem={renderTask}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={{
+                            paddingHorizontal: 16,
+                            paddingTop: 8,
+                            paddingBottom: 20,
+                            flexGrow: 1
+                        }}
+                        ListEmptyComponent={renderEmptyState}
+                        showsVerticalScrollIndicator={false}
+                    />
+                </View>
+            )}
+        </SafeAreaWrapper>
+    );
+}

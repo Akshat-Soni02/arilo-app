@@ -1,7 +1,8 @@
 import { AudioModule } from "expo-audio";
-import { router } from "expo-router";
+import { useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import DrawerMenu from "../../components/drawer-menu";
+import RecordingModal from "../../components/recording-modal";
 import SafeAreaWrapper from "../../components/safe-area-wrapper";
 import DateChip from "../../components/ui/date-chip";
 import MemoryCard from "../../components/ui/memory-card";
@@ -29,6 +30,7 @@ const MOCK_MEMORIES = [
 ];
 
 export default function HomeScreen() {
+    const [showRecordingModal, setShowRecordingModal] = useState(false);
     const { requestPermission } = usePermission(AudioModule.requestRecordingPermissionsAsync, {
         deniedMessage: "Microphone access is needed to record audio. Please enable it in your settings.",
         deniedTitle: "Microphone Permission Required"
@@ -37,8 +39,14 @@ export default function HomeScreen() {
     const handleRecordPress = async () => {
         const hasPermission = await requestPermission();
         if (hasPermission) {
-            router.push('/record-screen?autostart=true');
+            setShowRecordingModal(true);
         }
+    };
+
+    const handleSaveRecording = (uri: string) => {
+        console.log('Saving recording:', uri);
+        // TODO: Implement save logic (upload to server, save locally, etc.)
+        setShowRecordingModal(false);
     };
 
     return (
@@ -63,15 +71,6 @@ export default function HomeScreen() {
                     />
                 ))}
             </ScrollView>
-
-            {/* Record Button (Fixed) */}
-            <TouchableOpacity
-                className="absolute bottom-10 items-center w-full"
-                onPress={handleRecordPress}
-            >
-                <RecordBtn />
-            </TouchableOpacity>
-
         </SafeAreaWrapper>
     );
 }

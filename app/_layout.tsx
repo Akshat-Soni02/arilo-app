@@ -3,36 +3,28 @@
 import { DarkTheme as NavDarkTheme, DefaultTheme as NavDefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
 import { palette } from '../constants/colors';
-
+import { AuthProvider } from '../context/AuthContext';
+import { store } from '../store';
 
 import 'react-native-reanimated';
 import "../global.css";
 
-
 import { Inter_400Regular, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 import { useColorScheme } from '../hooks/use-color-scheme';
 
 SplashScreen.preventAutoHideAsync();
 
+
+
 export const unstable_settings = {
   anchor: '(drawer)',
 };
-
-
-function StackScreens() {
-  return (
-    <Stack>
-      <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-      <Stack.Screen name="record-screen" options={{ headerShown: false }} />
-    </Stack>
-  );
-}
 
 function ProviderWrapper({ children }: { children: React.ReactNode }): React.ReactNode {
   const colorScheme = useColorScheme();
@@ -50,7 +42,6 @@ function ProviderWrapper({ children }: { children: React.ReactNode }): React.Rea
       surface: themeColors.surface,
       outline: themeColors.border,
       text: themeColors.text,
-      // Add other Paper-specific color mappings here
     },
   };
 
@@ -101,9 +92,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ProviderWrapper>
-      <StackScreens />
-      <StatusBar style="auto" />
-    </ProviderWrapper>
+    <AuthProvider>
+      <Provider store={store}>
+        <ProviderWrapper>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="login" />
+            <Stack.Screen name="(drawer)" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ProviderWrapper>
+      </Provider>
+    </AuthProvider>
   );
 }

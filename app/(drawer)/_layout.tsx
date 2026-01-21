@@ -3,15 +3,35 @@ import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { router } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { handleGoogleSignOut } from '../../components/button/GoogleButton';
 import { palette } from '../../constants/colors';
+import { useAuth } from '../../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { clearUserInfo } from '../../store/slices/userSlice';
 
 const CustomDrawerContent = (props: any) => {
     const { bottom } = useSafeAreaInsets();
     const currentRoute = props.state.routes[props.state.index].name;
+    const { logout } = useAuth();
+    const dispatch = useAppDispatch();
+    const userInfo = useAppSelector((state) => state.user.userInfo);
+
+    const handleLogout = async () => {
+        // Sign out from Google
+        await handleGoogleSignOut();
+
+        // Clear user info from Redux
+        dispatch(clearUserInfo());
+
+        // Clear token and navigate to login
+        await logout();
+
+        router.replace('/login');
+    };
 
     const menuItems = [
         { label: 'Organize', icon: 'folder-outline', route: 'index' },
@@ -77,13 +97,24 @@ const CustomDrawerContent = (props: any) => {
 
             {/* Profile Footer */}
             <View className="px-6 pb-6 pt-4 border-t border-border flex-row items-center justify-between" style={{ marginBottom: bottom }}>
-                <View className="flex-row items-center">
-                    <View className="h-10 w-10 rounded-full bg-surface items-center justify-center mr-3">
-                        <Ionicons name="person-outline" size={20} color={palette.light.text} />
-                    </View>
-                    <Text variant="titleMedium" className="font-semibold text-text">Name</Text>
+                <View className="flex-row items-center flex-1">
+                    {userInfo?.photo ? (
+                        <Image
+                            source={{ uri: userInfo.photo }}
+                            className="h-10 w-10 rounded-full mr-3"
+                        />
+                    ) : (
+                        <View className="h-10 w-10 rounded-full bg-surface items-center justify-center mr-3">
+                            <Ionicons name="person-outline" size={20} color={palette.light.text} />
+                        </View>
+                    )}
+                    <Text variant="titleMedium" className="font-semibold text-text flex-1" numberOfLines={1}>
+                        {userInfo?.name || 'Guest'}
+                    </Text>
                 </View>
-                <Ionicons name="ellipsis-horizontal" size={20} color={palette.light.textMuted} />
+                <TouchableOpacity onPress={handleLogout} className="ml-2">
+                    <Ionicons name="log-out-outline" size={22} color={palette.light.textMuted} />
+                </TouchableOpacity>
             </View>
         </View>
     );
