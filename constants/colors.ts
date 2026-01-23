@@ -9,6 +9,7 @@ export const palette = {
         surfaceMint: "#D1E3D7",
         primary: "#F07E54",
         text: "#2d2d2dff",
+        textWhite:"#ffff",
         textMuted: "#717171",
         border: "#E8E4D9",
         accent: "#E6C17A", // Soft gold

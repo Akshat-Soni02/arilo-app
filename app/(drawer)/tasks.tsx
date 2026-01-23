@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, TextInput, TouchableOpacity, View } from '
 import { Text } from 'react-native-paper';
 import DrawerMenu from '../../components/drawer-menu';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
+import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { deleteTask, fetchTasks, Task, TaskStatus, updateTask } from '../../store/slices/taskSlice';
 
@@ -87,7 +88,9 @@ export default function TaskScreen() {
     });
 
     // Separate tasks by status
+    // IN_PROGRESS tasks are shown from all dates (overall), not just the selected date
     const inProgressTasks = filteredByDate.filter(task => task.status === 'IN_PROGRESS');
+    // DONE tasks are filtered by the selected date
     const doneTasks = filteredByDate.filter(task => task.status === 'DONE');
 
     // Combine with IN_PROGRESS first, then DONE
@@ -147,9 +150,6 @@ export default function TaskScreen() {
     const renderEmptyState = () => (
         <View className="flex-1 items-center justify-center py-12">
             <Ionicons name="checkbox-outline" size={64} color="#9CA3AF" />
-            <Text variant="titleMedium" className="text-gray-500 mt-4">
-                No tasks found
-            </Text>
             <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8">
                 {searchQuery
                     ? 'Try a different search term'
@@ -163,19 +163,28 @@ export default function TaskScreen() {
     return (
         <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
             {/* Header */}
-            <View className="px-4 py-3 flex-row items-center justify-between bg-white border-b border-gray-100">
-                <DrawerMenu />
-                <TouchableOpacity onPress={loadTasks} className="p-2">
-                    <Ionicons name="refresh" size={24} color="#6B7280" />
-                </TouchableOpacity>
+            <View className="px-4 py-4 bg-white border-b border-gray-100">
+                <View className="flex-row items-center justify-between mb-3">
+                    <DrawerMenu />
+                    <TouchableOpacity onPress={loadTasks} className="p-2">
+                        <Ionicons name="refresh" size={24} color="#6B7280" />
+                    </TouchableOpacity>
+                </View>
+                <View className="items-center">
+                    <Text variant="headlineMedium" className="text-gray-800 font-bold">
+                        Task Journal
+                    </Text>
+                    <Text variant="bodyMedium" className="text-gray-500 mt-1">
+                        {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </Text>
+                </View>
             </View>
 
             {/* Search Bar */}
             <View className="px-4 py-3 bg-white">
                 <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
-                    <Ionicons name="search" size={20} color="#9CA3AF" />
                     <TextInput
-                        placeholder="Search tasks..."
+                        placeholder="What's in your mind?"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         className="flex-1 ml-2 text-gray-800"
@@ -186,8 +195,15 @@ export default function TaskScreen() {
                             <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                         </TouchableOpacity>
                     )}
+                    <View
+                        className="ml-2 p-2 rounded-lg"
+                        style={{ backgroundColor: palette.dark.primary }}
+                    >
+                        <Ionicons name="search" size={20} color={palette.dark.text} />
+                    </View>
                 </View>
             </View>
+
 
             {/* Date Navigation */}
             <View className="px-4 py-3 bg-white border-b border-gray-100">

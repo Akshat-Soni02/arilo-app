@@ -60,8 +60,6 @@ const GoogleButton = () => {
               return;
             }
 
-            console.log('Google User Info:', userInfo);
-
             // Extract user information from Google response
             const user = userInfo.data.user;
             if (user) {
@@ -75,7 +73,7 @@ const GoogleButton = () => {
             }
 
             // Store temporary JWT token in AsyncStorage
-            const tempToken = 'Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJzaGFoYjM3MDNAZ21haWwuY29tIiwibmFtZSI6IkJoYXZ5YSBTaGFoIiwidXNlcklkIjoiNTI4YzZlOGItOGY1NC00OWRkLWIzN2EtZDMxZGUzZDBjYWY5IiwiaWF0IjoxNzY5MDA3NzMzLCJleHAiOjE3NjkwOTQxMzN9.xzMSYgtFacnf__3yqJcuyDZ8ZoNgOPhz7I7V58ToHCZfhmN0mY4d3xwkUiAIO9N5';
+            const tempToken = 'Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJzaGFoYjM3MDNAZ21haWwuY29tIiwibmFtZSI6IkJoYXZ5YSBTaGFoIiwidXNlcklkIjoiNTI4YzZlOGItOGY1NC00OWRkLWIzN2EtZDMxZGUzZDBjYWY5IiwiaWF0IjoxNzY5MTc1Nzk3LCJleHAiOjE3NjkyNjIxOTd9.4RhgL1Ou2NSSg467hlOMz-wjwY0bhprZyHu3MXS69bAVxRjqrNURCf9IKmUJFXpc';
             await setToken(tempToken);
 
             // Navigate to home screen

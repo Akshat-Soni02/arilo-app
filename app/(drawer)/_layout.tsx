@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { router } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
@@ -19,6 +19,12 @@ const CustomDrawerContent = (props: any) => {
     const { logout } = useAuth();
     const dispatch = useAppDispatch();
     const userInfo = useAppSelector((state) => state.user.userInfo);
+    const tasks = useAppSelector((state) => state.tasks.tasks);
+
+    // Calculate count of IN_PROGRESS tasks
+    const inProgressCount = useMemo(() => {
+        return tasks.filter(task => task.status === 'IN_PROGRESS').length;
+    }, [tasks]);
 
     const handleLogout = async () => {
         // Sign out from Google
@@ -34,14 +40,13 @@ const CustomDrawerContent = (props: any) => {
     };
 
     const menuItems = [
-        { label: 'Organize', icon: 'folder-outline', route: 'index' },
+        { label: 'Home', icon: 'home-outline', route: '/' },
+        { label: 'Organize', icon: 'folder-outline', route: 'organize' },
         { label: 'Tasks', icon: 'checkbox-outline', route: 'tasks' },
-        { label: 'Strong Query', icon: 'search-outline', route: 'query' },
     ];
 
     const bottomItems = [
         { label: 'Settings', icon: 'settings-outline', route: 'settings' },
-        { label: 'Privacy', icon: 'document-text-outline', route: 'privacy' },
     ];
 
     return (
@@ -61,13 +66,19 @@ const CustomDrawerContent = (props: any) => {
                         <TouchableOpacity
                             key={item.label}
                             className={`flex-row items-center px-4 py-3 mb-1 rounded-xl ${currentRoute === item.route ? 'bg-secondary' : 'transparent'}`}
-                            onPress={() => router.navigate(item.route)}
+                            onPress={() => router.navigate(item.route as any)}
                         >
-                            <Ionicons name={item.icon as any} size={22} color={palette.light.text} />
+                            <Ionicons name={item.icon as any} size={22} color={palette.light.primary} />
                             <Text variant="bodyLarge" className="ml-4 font-medium text-text">{item.label}</Text>
-                            {/* Right Icon for top items */}
+                            {/* Show task count for Tasks item */}
+                            {item.route === 'tasks' && inProgressCount > 0 && (
+                                <View className="ml-2 px-2 py-0.5 rounded-full" style={{ backgroundColor: palette.light.primary }}>
+                                    <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.textWhite }}>{inProgressCount}</Text>
+                                </View>
+                            )}
+                            {/* Right Arrow */}
                             <View className="flex-1 items-end">
-                                <Ionicons name={item.icon === 'folder-outline' ? 'albums-outline' : item.icon === 'checkbox-outline' ? 'list-outline' : 'search'} size={18} color={palette.light.text} />
+                                <Ionicons name="chevron-forward" size={18} color={palette.light.textMuted} />
                             </View>
                         </TouchableOpacity>
                     ))}
@@ -82,12 +93,13 @@ const CustomDrawerContent = (props: any) => {
                         <TouchableOpacity
                             key={item.label}
                             className={`flex-row items-center px-4 py-3 mb-1 rounded-xl`}
-                            onPress={() => router.navigate(item.route)}
+                            onPress={() => router.navigate(item.route as any)}
                         >
-                            <Ionicons name={item.icon as any} size={22} color={palette.light.text} />
+                            <Ionicons name={item.icon as any} size={22} color={palette.light.primary} />
                             <Text variant="bodyLarge" className="ml-4 font-medium text-text">{item.label}</Text>
+                            {/* Right Arrow */}
                             <View className="flex-1 items-end">
-                                <Ionicons name={item.icon === 'settings-outline' ? 'cog-outline' : 'file-tray-full-outline'} size={18} color={palette.light.text} />
+                                <Ionicons name="chevron-forward" size={18} color={palette.light.textMuted} />
                             </View>
                         </TouchableOpacity>
                     ))}
@@ -137,6 +149,8 @@ export default function DrawerLayout() {
                 <Drawer.Screen name="index" />
                 {/* Define other screens to avoid navigation errors, even if they render the same component for now */}
                 <Drawer.Screen name="tasks" options={{ drawerItemStyle: { display: 'none' } }} />
+                <Drawer.Screen name="organize" options={{ drawerItemStyle: { display: 'none' } }} />
+                <Drawer.Screen name="tag-notes" options={{ drawerItemStyle: { display: 'none' } }} />
                 <Drawer.Screen name="query" options={{ drawerItemStyle: { display: 'none' } }} />
                 <Drawer.Screen name="settings" options={{ drawerItemStyle: { display: 'none' } }} />
                 <Drawer.Screen name="privacy" options={{ drawerItemStyle: { display: 'none' } }} />
