@@ -55,6 +55,37 @@ export const fetchNotes = createAsyncThunk(
     }
 );
 
+// Async thunk to upload audio note
+export const uploadAudioNote = createAsyncThunk(
+    'notes/uploadAudioNote',
+    async (audioUri: string) => {
+        const token = await AsyncStorage.getItem(TOKEN_KEY);
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/upload`;
+
+        const formData = new FormData();
+        formData.append('file', {
+            uri: audioUri,
+            type: 'audio/m4a',
+            name: 'recording.m4a',
+        } as any);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': token || '',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to upload audio note');
+        }
+
+        const data = await response.json();
+        return data;
+    }
+);
+
 const noteSlice = createSlice({
     name: 'notes',
     initialState,
@@ -79,6 +110,19 @@ const noteSlice = createSlice({
             .addCase(fetchNotes.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Failed to fetch notes';
+            })
+            .addCase(uploadAudioNote.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(uploadAudioNote.fulfilled, (state, action) => {
+                state.loading = false;
+                // Optionally add the new note to the list
+                // state.notes.push(action.payload);
+            })
+            .addCase(uploadAudioNote.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Failed to upload audio note';
             });
     },
 });

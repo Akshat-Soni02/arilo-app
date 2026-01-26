@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../../constants/colors';
 import { useAppSelector } from '../../store/hooks';
-import { useRouter } from 'expo-router';
 
 export default function TabLayout() {
 
@@ -82,12 +81,18 @@ export default function TabLayout() {
                 />
 
                 <Tabs.Screen
-                    name="record"
+                    name="record_trigger" // changed from 'record' to avoid conflict since /record is now in root
                     options={{
                         title: '',
                         tabBarButton: () => <MicTabButton />,
                     }}
-
+                    listeners={() => ({
+                        tabPress: (e) => {
+                            // @ts-ignore
+                            e.preventDefault(); // Prevent actual tab navigation
+                            router.push('/record');
+                        },
+                    })}
                 />
 
                 <Tabs.Screen
@@ -133,6 +138,7 @@ const styles = StyleSheet.create({
         height: 70,
         paddingBottom: 10,
         backgroundColor: '#fff',
+        overflow: 'visible', // Ensure the elevated button isn't clipped
     },
     micWrapper: {
         top: -30,
