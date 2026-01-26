@@ -1,10 +1,17 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export interface SubscriptionInfo {
+    planName: string;
+    noteDailyLimit: number;
+    noteMonthlyLimit: number;
+}
+
 export interface UserInfo {
     id?: string;
     email: string;
     name: string;
     photo?: string;
+    subscription: SubscriptionInfo;
 }
 
 interface AuthResponse {
@@ -14,6 +21,7 @@ interface AuthResponse {
     email: string;
     name: string;
     profilePictureUrl: string;
+    subscription: SubscriptionInfo;
 }
 
 interface UserState {
@@ -74,6 +82,11 @@ const userSlice = createSlice({
                     email: action.payload.email,
                     name: action.payload.name,
                     photo: action.payload.profilePictureUrl,
+                    subscription: {
+                        planName: action.payload.subscription.planName,
+                        noteDailyLimit: action.payload.subscription.noteDailyLimit,
+                        noteMonthlyLimit: action.payload.subscription.noteMonthlyLimit,
+                    },
                 };
             })
             .addCase(loginWithGoogle.rejected, (state, action) => {

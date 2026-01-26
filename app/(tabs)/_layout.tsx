@@ -48,8 +48,9 @@ export default function TabLayout() {
         <>
             <Tabs
                 screenOptions={{
-                    headerLeft: () => <ProfileHeader />,
-                    headerTitleAlign: 'center',
+                    headerShown: false,
+                    // headerLeft: () => <ProfileHeader />,
+                    // headerTitleAlign: 'center',
                     tabBarStyle: styles.tabBar,
                     tabBarActiveTintColor: palette.light.primary,
                     tabBarInactiveTintColor:
@@ -110,15 +111,22 @@ export default function TabLayout() {
                 />
 
                 <Tabs.Screen
-                    name="settings"
+                    name="profile"
                     options={{
-                        title: 'Settings',
+                        title: 'Profile',
                         tabBarIcon: ({ color }) => (
-                            <Ionicons
-                                name="settings"
-                                size={22}
-                                color={color}
-                            />
+                            userInfo?.photo ? (
+                                <Image
+                                    source={{ uri: userInfo.photo }}
+                                    style={{ width: 22, height: 22, borderRadius: 11 }}
+                                />
+                            ) : (
+                                <Ionicons
+                                    name="person"
+                                    size={22}
+                                    color={color}
+                                />
+                            )
                         ),
                     }}
                 />
@@ -126,7 +134,6 @@ export default function TabLayout() {
                 {/* hidden */}
                 <Tabs.Screen name="privacy" options={{ href: null }} />
                 <Tabs.Screen name="tag-notes" options={{ href: null }} />
-                <Tabs.Screen name="profile" options={{ href: null }} />
             </Tabs>
 
         </>
