@@ -1,27 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
-import { AudioModule } from "expo-audio";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
 import { Text } from 'react-native-paper';
-import DrawerMenu from "../../components/drawer-menu";
+
 import SafeAreaWrapper from "../../components/safe-area-wrapper";
 import { palette } from '../../constants/colors';
-import { usePermission } from "../../hooks/use-permission";
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchNotes } from '../../store/slices/noteSlice';
 
 export default function HomeScreen() {
-    const [showRecordingModal, setShowRecordingModal] = useState(false);
-    const { requestPermission } = usePermission(AudioModule.requestRecordingPermissionsAsync, {
-        deniedMessage: "Microphone access is needed to record audio. Please enable it in your settings.",
-        deniedTitle: "Microphone Permission Required"
-    });
+
 
     const dispatch = useAppDispatch();
     const { notes, loading, error } = useAppSelector((state) => state.notes);
     const [refreshing, setRefreshing] = useState(false);
-
-    // Filter for COMPLETED notes on the frontend and sort by most recent first
+    
     const completedNotes = notes
         .filter(note => note.status === 'COMPLETED')
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -40,17 +33,7 @@ export default function HomeScreen() {
         setRefreshing(false);
     };
 
-    const handleRecordPress = async () => {
-        const hasPermission = await requestPermission();
-        if (hasPermission) {
-            setShowRecordingModal(true);
-        }
-    };
 
-    const handleSaveRecording = (uri: string) => {
-        console.log('Saving recording:', uri);
-        setShowRecordingModal(false);
-    };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -85,9 +68,7 @@ export default function HomeScreen() {
                         <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
                             <Ionicons name="mic" size={16} color={palette.light.primary} />
                         </View>
-                        <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
-                            Your Note
-                        </Text>
+
                     </View>
                     <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
                         {note.stt || 'No transcription available'}
@@ -109,7 +90,7 @@ export default function HomeScreen() {
                             <View className="flex-row items-center mb-2">
                                 <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
                                 <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
-                                    AI Summary
+                                    Arilo says:
                                 </Text>
                             </View>
                             <Text variant="bodyMedium" className="text-gray-700 leading-5">
@@ -161,31 +142,27 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaWrapper className="flex-1" edges={['top']}>
-            {/* Modern Header with Gradient */}
             <View className="px-6">
-                <View className="flex-row items-center justify-between mb-4">
-                    <DrawerMenu />
+                <View className="flex-row items-center justify-center mb-4">
+
                     <View className="flex-row items-center">
                         <View className="px-4 py-2 rounded-full" style={{ backgroundColor: palette.light.primary + '15' }}>
-                            <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
+                            <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary, fontFamily: 'Inter_600SemiBold' }}>
                                 {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </Text>
                         </View>
                     </View>
                 </View>
 
-                <View>
-                    <Text variant="headlineMedium" className="text-gray-800 font-bold mb-1">
+                <View className="flex-col items-center justify-center">
+                    <Text variant="headlineMedium" className="text-gray-800 font-bold mb-1 text-center ">
                         Your Notes
                     </Text>
-                    <Text variant="bodyMedium" className="text-gray-500">
+                    <Text variant="bodyMedium" className="text-gray-500 text-center">
                         {completedNotes.length} {completedNotes.length === 1 ? 'note' : 'notes'} captured
                     </Text>
                 </View>
             </View>
-
-
-            {/* Content */}
             {error ? (
                 renderErrorState()
             ) : loading && completedNotes.length === 0 ? (

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import DrawerMenu from '../../components/drawer-menu';
+
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -140,7 +140,7 @@ export default function TaskScreen() {
                         className="p-2"
                         activeOpacity={0.7}
                     >
-                        <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                        <Ionicons name="trash-outline" size={20} color={palette.light.error} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -164,12 +164,6 @@ export default function TaskScreen() {
         <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
             {/* Header */}
             <View className="px-4 py-4 bg-white border-b border-gray-100">
-                <View className="flex-row items-center justify-between mb-3">
-                    <DrawerMenu />
-                    <TouchableOpacity onPress={loadTasks} className="p-2">
-                        <Ionicons name="refresh" size={24} color="#6B7280" />
-                    </TouchableOpacity>
-                </View>
                 <View className="items-center">
                     <Text variant="headlineMedium" className="text-gray-800 font-bold">
                         Task Journal
@@ -261,7 +255,7 @@ export default function TaskScreen() {
                 </View>
             ) : loading ? (
                 <View className="flex-1 items-center justify-center">
-                    <ActivityIndicator size="large" color="#F97316" />
+                    <ActivityIndicator size="large" color={palette.light.primary} />
                     <Text variant="bodyMedium" className="text-gray-500 mt-4">
                         Loading tasks...
                     </Text>

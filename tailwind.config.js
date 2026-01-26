@@ -1,4 +1,3 @@
-import { platformSelect } from "nativewind/theme";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -30,13 +29,10 @@ module.exports = {
         chipToday: "var(--color-chip-today)",
       },
       fontFamily: {
-        system: platformSelect({
-          ios: "Georgia",
-          android: "sans-serif",
-          default: "ui-sans-serif",
-        }),
-        inter: ["Inter"],
-        "inter-bold": ["Inter-Bold"],
+        sans: ["Montserrat", "system-ui", "sans-serif"],
+        heading: ["Futura", "Montserrat", "sans-serif"],
+        montserrat: ["Montserrat"],
+        futura: ["Futura"],
       },
     },
   },

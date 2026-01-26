@@ -1,9 +1,9 @@
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import logo from '../assets/images/logo.png';
 import GoogleButton from '../components/button/GoogleButton';
 import { palette } from '../constants/colors';
-import logo from '../assets/images/logo.png';
 import { useColorScheme } from '../hooks/use-color-scheme';
 
 export default function LoginScreen() {
@@ -62,12 +62,10 @@ const styles = StyleSheet.create({
     appName: {
         fontWeight: 'bold',
         marginBottom: 8,
-        fontFamily: 'Inter-Bold',
     },
     tagline: {
         marginBottom: 48,
         textAlign: 'center',
-        fontFamily: 'Inter',
     },
     buttonContainer: {
         marginTop: 20,

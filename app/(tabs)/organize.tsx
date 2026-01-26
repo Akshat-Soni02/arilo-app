@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import DrawerMenu from '../../components/drawer-menu';
+
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -35,8 +35,6 @@ export default function Organize() {
                 name: newTagName.trim(),
                 description: newTagDescription.trim()
             })).unwrap();
-
-            // Close modal and reset form
             setIsModalVisible(false);
             setNewTagName('');
             setNewTagDescription('');
@@ -45,7 +43,6 @@ export default function Organize() {
         }
     };
 
-    // Filter tags based on search query
     const filteredTags = tags.filter(tag =>
         tag.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -103,14 +100,10 @@ export default function Organize() {
     return (
         <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
             {/* Header */}
-            <View className="px-4 py-3 flex-row items-center justify-between bg-white border-b border-gray-100">
-                <DrawerMenu />
-                <Text variant="headlineSmall" className="text-gray-800 font-bold flex-1 text-center">
-                    Organize
+            <View className="px-4 py-3 flex-row items-center justify-center bg-white border-b border-gray-100">
+                <Text variant="headlineSmall" className="text-gray-800 font-medium text-center">
+                    Your Memories
                 </Text>
-                <TouchableOpacity onPress={loadTags} className="p-2">
-                    <Ionicons name="refresh" size={24} color="#6B7280" />
-                </TouchableOpacity>
             </View>
 
             {/* Search Bar */}

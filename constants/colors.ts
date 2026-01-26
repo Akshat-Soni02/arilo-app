@@ -21,6 +21,7 @@ export const palette = {
         cardUserBg: "#FFFFFF",    // White for user cards
         cardAssistantBg: "#F9F0E0", // Warm beige/gold tint for assistant
         chipToday: "#F0EAE0",     // Matches search bg
+        error: "#EF4444",
     },
     // Dark Theme (Deep Midnight Warmth)
     dark: {

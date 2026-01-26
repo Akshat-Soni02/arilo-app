@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useAppDispatch } from '../../store/hooks';
-import { setUserInfo } from '../../store/slices/userSlice';
+import { loginWithGoogle } from '../../store/slices/userSlice';
 
 // Configure Google Sign-In once at module level
 GoogleSignin.configure({
@@ -43,11 +43,7 @@ const GoogleButton = () => {
         style={{ width: 300, height: 58, borderRadius: 5 }}
         disabled={isSigningIn}
         onPress={async () => {
-          // Prevent concurrent sign-in attempts
-          if (isSigningIn) {
-            console.log("Sign-in already in progress, ignoring duplicate request");
-            return;
-          }
+          if (isSigningIn) return;
 
           setIsSigningIn(true);
 
@@ -55,41 +51,39 @@ const GoogleButton = () => {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
 
-            if (!userInfo || !userInfo?.data?.idToken) {
-              Alert.alert("Google sign-in failed", "Not able to fetch user data from google Account");
+            if (!userInfo || !userInfo.data?.idToken) {
+              Alert.alert('Sign in failed', 'Could not retrieve ID token from Google');
               return;
             }
 
-            // Extract user information from Google response
-            const user = userInfo.data.user;
-            if (user) {
-              // Store user info in Redux
-              dispatch(setUserInfo({
-                email: user.email || '',
-                name: user.name || user.givenName || 'User',
-                photo: user.photo || undefined,
-                id: user.id || undefined,
-              }));
+            const idToken = userInfo.data.idToken;
+            const resultAction = await dispatch(loginWithGoogle(idToken));
+
+            if (loginWithGoogle.fulfilled.match(resultAction)) {
+              const data = resultAction.payload;
+              const tokenToStore = data.type && data.token ? `${data.type} ${data.token}` : data.token;
+              await setToken(tokenToStore);
+              router.replace('/(tabs)');
+            } else {
+              if (resultAction.payload) {
+                console.error('Login Failed with error:', resultAction.payload);
+                Alert.alert('Login Failed', String(resultAction.payload));
+              } else {
+                console.error('Login Failed:', resultAction.error.message);
+                Alert.alert('Login Failed', resultAction.error.message || 'Authentication failed');
+              }
             }
 
-            // Store temporary JWT token in AsyncStorage
-            const tempToken = 'Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJzaGFoYjM3MDNAZ21haWwuY29tIiwibmFtZSI6IkJoYXZ5YSBTaGFoIiwidXNlcklkIjoiNTI4YzZlOGItOGY1NC00OWRkLWIzN2EtZDMxZGUzZDBjYWY5IiwiaWF0IjoxNzY5MTc1Nzk3LCJleHAiOjE3NjkyNjIxOTd9.4RhgL1Ou2NSSg467hlOMz-wjwY0bhprZyHu3MXS69bAVxRjqrNURCf9IKmUJFXpc';
-            await setToken(tempToken);
-
-            // Navigate to home screen
-            router.replace('/(drawer)');
           } catch (error: any) {
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-              console.log("User cancelled the login");
+              console.log('User cancelled the login');
             } else if (error.code === statusCodes.IN_PROGRESS) {
-              Alert.alert("Google sign-in", "Sign-in in progress");
-              console.log("User sign-in in progress already");
+              console.log('Sign in is in progress already');
             } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-              console.log("play services are not available or outdated");
-              Alert.alert("Google sign-in", "Play services are not available\ntry after some time");
+              Alert.alert('Play Services Not Available', 'Please update or install Google Play Services');
             } else {
-              console.log(error);
-              Alert.alert("Google sign-in failed", "Please try after some time");
+              console.error('Login Error:', error);
+              Alert.alert('Login Failed', error.message || 'An unexpected error occurred');
             }
           } finally {
             setIsSigningIn(false);
