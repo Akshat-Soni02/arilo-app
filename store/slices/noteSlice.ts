@@ -86,6 +86,36 @@ export const uploadAudioNote = createAsyncThunk(
     }
 );
 
+interface PollResponse {
+    status: NoteStatus;
+    error_message?: string;
+    stt?: string | null;
+    noteback?: string | null;
+}
+
+// Async thunk to poll note status
+export const pollNoteStatus = createAsyncThunk(
+    'notes/pollNoteStatus',
+    async (jobId: string) => {
+        const token = await AsyncStorage.getItem(TOKEN_KEY);
+
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/poll?job_id=${jobId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': token || '',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to poll note status');
+        }
+
+        const data: PollResponse = await response.json();
+        return { jobId, data };
+    }
+);
+
 const noteSlice = createSlice({
     name: 'notes',
     initialState,
@@ -95,6 +125,12 @@ const noteSlice = createSlice({
         },
         clearNotes: (state) => {
             state.notes = [];
+        },
+        markNoteAsFailed: (state, action) => {
+            const index = state.notes.findIndex(n => n.jobId === action.payload);
+            if (index !== -1) {
+                state.notes[index].status = 'FAILED';
+            }
         },
     },
     extraReducers: (builder) => {
@@ -117,15 +153,36 @@ const noteSlice = createSlice({
             })
             .addCase(uploadAudioNote.fulfilled, (state, action) => {
                 state.loading = false;
-                // Optionally add the new note to the list
-                // state.notes.push(action.payload);
+                const newNote: Note = {
+                    noteId: action.payload.job_id,
+                    jobId: action.payload.job_id,
+                    noteType: 'AUDIO',
+                    status: 'PROCESSING',
+                    stt: null,
+                    noteback: null,
+                    createdAt: new Date().toISOString(),
+                };
+                state.notes.unshift(newNote);
             })
             .addCase(uploadAudioNote.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Failed to upload audio note';
+            })
+            .addCase(pollNoteStatus.fulfilled, (state, action) => {
+                const { jobId, data } = action.payload;
+                const noteIndex = state.notes.findIndex(n => n.jobId === jobId);
+
+                if (noteIndex !== -1) {
+                    state.notes[noteIndex] = {
+                        ...state.notes[noteIndex],
+                        status: data.status,
+                        stt: data.stt ?? state.notes[noteIndex].stt,
+                        noteback: data.noteback ?? state.notes[noteIndex].noteback,
+                    };
+                }
             });
     },
 });
 
-export const { clearError, clearNotes } = noteSlice.actions;
+export const { clearError, clearNotes, markNoteAsFailed } = noteSlice.actions;
 export default noteSlice.reducer;

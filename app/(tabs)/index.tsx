@@ -4,9 +4,10 @@ import { ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity, View }
 import { Text } from 'react-native-paper';
 
 import SafeAreaWrapper from "../../components/safe-area-wrapper";
+import { SkeletonNoteCard } from '../../components/SkeletonNoteCard';
 import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchNotes } from '../../store/slices/noteSlice';
+import { fetchNotes, markNoteAsFailed, pollNoteStatus } from '../../store/slices/noteSlice';
 
 export default function HomeScreen() {
 
@@ -14,10 +15,35 @@ export default function HomeScreen() {
     const dispatch = useAppDispatch();
     const { notes, loading, error } = useAppSelector((state) => state.notes);
     const [refreshing, setRefreshing] = useState(false);
-    
-    const completedNotes = notes
-        .filter(note => note.status === 'COMPLETED')
+
+    const displayedNotes = notes
+        .filter(note => note.status === 'COMPLETED' || note.status === 'PROCESSING')
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    useEffect(() => {
+        const processingNotes = notes.filter(note => note.status === 'PROCESSING');
+        if (processingNotes.length > 0) {
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+
+                processingNotes.forEach(note => {
+                    const createdAt = new Date(note.createdAt).getTime();
+                    const diffMinutes = (now - createdAt) / (1000 * 60);
+
+                    if (diffMinutes > 3) {
+                        // Timeout: mark as failed
+                        if (note.jobId) {
+                            dispatch(markNoteAsFailed(note.jobId));
+                        }
+                    } else if (note.jobId) {
+                        dispatch(pollNoteStatus(note.jobId));
+                    }
+                });
+            }, 3000); // Poll every 3 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [notes, dispatch]);
 
     useEffect(() => {
         loadNotes();
@@ -53,55 +79,60 @@ export default function HomeScreen() {
         return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-    const renderNoteCard = (note: any) => (
-        <View key={note.noteId} className="mb-4">
-            <View className="bg-white rounded-3xl overflow-hidden" style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 12,
-                elevation: 5
-            }}>
-                {/* User Message */}
-                <View className="p-5">
-                    <View className="flex-row items-center mb-3">
-                        <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
-                            <Ionicons name="mic" size={16} color={palette.light.primary} />
-                        </View>
-
-                    </View>
-                    <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
-                        {note.stt || 'No transcription available'}
-                    </Text>
-                    <View className="flex-row items-center justify-between mt-2">
-                        <Text variant="bodySmall" className="text-gray-400">
-                            {formatDate(note.createdAt)}
-                        </Text>
-                        <Text variant="bodySmall" className="text-gray-400">
-                            {formatTime(note.createdAt)}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* AI Summary */}
-                {note.noteback && (
-                    <View className="px-5 pb-5">
-                        <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
-                            <View className="flex-row items-center mb-2">
-                                <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
-                                <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
-                                    Arilo says:
-                                </Text>
+    const renderNoteCard = (note: any) => {
+        if (note.status === 'PROCESSING') {
+            return <SkeletonNoteCard key={note.noteId || note.jobId} note={note} />;
+        }
+        return (
+            <View key={note.noteId} className="mb-4">
+                <View className="bg-white rounded-3xl overflow-hidden" style={{
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 5
+                }}>
+                    {/* User Message */}
+                    <View className="p-5">
+                        <View className="flex-row items-center mb-3">
+                            <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
+                                <Ionicons name="mic" size={16} color={palette.light.primary} />
                             </View>
-                            <Text variant="bodyMedium" className="text-gray-700 leading-5">
-                                {note.noteback}
+
+                        </View>
+                        <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
+                            {note.stt || 'No transcription available'}
+                        </Text>
+                        <View className="flex-row items-center justify-between mt-2">
+                            <Text variant="bodySmall" className="text-gray-400">
+                                {formatDate(note.createdAt)}
+                            </Text>
+                            <Text variant="bodySmall" className="text-gray-400">
+                                {formatTime(note.createdAt)}
                             </Text>
                         </View>
                     </View>
-                )}
+
+                    {/* AI Summary */}
+                    {note.noteback && (
+                        <View className="px-5 pb-5">
+                            <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
+                                <View className="flex-row items-center mb-2">
+                                    <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
+                                    <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
+                                        Arilo says:
+                                    </Text>
+                                </View>
+                                <Text variant="bodyMedium" className="text-gray-700 leading-5">
+                                    {note.noteback}
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+                </View>
             </View>
-        </View>
-    );
+        );
+    };
 
     const renderEmptyState = () => (
         <View className="flex-1 items-center justify-center py-20">
@@ -159,13 +190,13 @@ export default function HomeScreen() {
                         Your Notes
                     </Text>
                     <Text variant="bodyMedium" className="text-gray-500 text-center">
-                        {completedNotes.length} {completedNotes.length === 1 ? 'note' : 'notes'} captured
+                        {displayedNotes.length} {displayedNotes.length === 1 ? 'note' : 'notes'} captured
                     </Text>
                 </View>
             </View>
             {error ? (
                 renderErrorState()
-            ) : loading && completedNotes.length === 0 ? (
+            ) : loading && displayedNotes.length === 0 ? (
                 <View className="flex-1 items-center justify-center">
                     <ActivityIndicator size="large" color={palette.light.primary} />
                     <Text variant="bodyMedium" className="text-gray-500 mt-4">
@@ -181,10 +212,10 @@ export default function HomeScreen() {
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[palette.light.primary]} />
                     }
                 >
-                    {completedNotes.length === 0 ? (
+                    {displayedNotes.length === 0 ? (
                         renderEmptyState()
                     ) : (
-                        completedNotes.map(renderNoteCard)
+                        displayedNotes.map(renderNoteCard)
                     )}
                 </ScrollView>
             )}
