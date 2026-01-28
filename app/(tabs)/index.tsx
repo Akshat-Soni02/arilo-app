@@ -31,7 +31,6 @@ export default function HomeScreen() {
                     const diffMinutes = (now - createdAt) / (1000 * 60);
 
                     if (diffMinutes > 3) {
-                        // Timeout: mark as failed
                         if (note.jobId) {
                             dispatch(markNoteAsFailed(note.jobId));
                         }
@@ -39,7 +38,7 @@ export default function HomeScreen() {
                         dispatch(pollNoteStatus(note.jobId));
                     }
                 });
-            }, 3000); // Poll every 3 seconds
+            }, 2000);
 
             return () => clearInterval(interval);
         }
@@ -81,55 +80,52 @@ export default function HomeScreen() {
 
     const renderNoteCard = (note: any) => {
         if (note.status === 'PROCESSING') {
-            return <SkeletonNoteCard key={note.noteId || note.jobId} note={note} />;
+            return <SkeletonNoteCard note={note} />;
         }
         return (
-            <View key={note.noteId} className="mb-4">
-                <View className="bg-white rounded-3xl overflow-hidden" style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 12,
-                    elevation: 5
-                }}>
-                    {/* User Message */}
-                    <View className="p-5">
-                        <View className="flex-row items-center mb-3">
-                            <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
-                                <Ionicons name="mic" size={16} color={palette.light.primary} />
-                            </View>
-
+            <View className="bg-white rounded-3xl overflow-hidden" style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 12,
+                elevation: 5
+            }}>
+                {/* User Message */}
+                <View className="p-5">
+                    <View className="flex-row items-center mb-3">
+                        <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
+                            <Ionicons name="mic" size={16} color={palette.light.primary} />
                         </View>
-                        <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
-                            {note.stt || 'No transcription available'}
+                    </View>
+                    <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
+                        {note.stt || 'No transcription available'}
+                    </Text>
+                    <View className="flex-row items-center justify-between mt-2">
+                        <Text variant="bodySmall" className="text-gray-400">
+                            {formatDate(note.createdAt)}
                         </Text>
-                        <View className="flex-row items-center justify-between mt-2">
-                            <Text variant="bodySmall" className="text-gray-400">
-                                {formatDate(note.createdAt)}
-                            </Text>
-                            <Text variant="bodySmall" className="text-gray-400">
-                                {formatTime(note.createdAt)}
+                        <Text variant="bodySmall" className="text-gray-400">
+                            {formatTime(note.createdAt)}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* AI Summary */}
+                {note.noteback && (
+                    <View className="px-5 pb-5">
+                        <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
+                            <View className="flex-row items-center mb-2">
+                                <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
+                                <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
+                                    Arilo says:
+                                </Text>
+                            </View>
+                            <Text variant="bodyMedium" className="text-gray-700 leading-5">
+                                {note.noteback}
                             </Text>
                         </View>
                     </View>
-
-                    {/* AI Summary */}
-                    {note.noteback && (
-                        <View className="px-5 pb-5">
-                            <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
-                                <View className="flex-row items-center mb-2">
-                                    <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
-                                    <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
-                                        Arilo says:
-                                    </Text>
-                                </View>
-                                <Text variant="bodyMedium" className="text-gray-700 leading-5">
-                                    {note.noteback}
-                                </Text>
-                            </View>
-                        </View>
-                    )}
-                </View>
+                )}
             </View>
         );
     };
@@ -215,7 +211,11 @@ export default function HomeScreen() {
                     {displayedNotes.length === 0 ? (
                         renderEmptyState()
                     ) : (
-                        displayedNotes.map(renderNoteCard)
+                        displayedNotes.map((note) => (
+                            <View key={note.jobId} style={{ marginBottom: 16 }}>
+                                {renderNoteCard(note)}
+                            </View>
+                        ))
                     )}
                 </ScrollView>
             )}

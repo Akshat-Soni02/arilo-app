@@ -28,7 +28,7 @@ export const SkeletonNoteCard = ({ note }: SkeletonNoteCardProps) => {
     }, []);
 
     return (
-        <View className="mb-4">
+        <View>
             <View className="bg-white rounded-3xl overflow-hidden" style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 4 },

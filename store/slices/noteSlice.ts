@@ -50,8 +50,17 @@ export const fetchNotes = createAsyncThunk(
             throw new Error('Failed to fetch notes');
         }
 
-        const data: Note[] = await response.json();
-        return data;
+        const data = await response.json();
+        const mappedData: Note[] = data.map((item: any) => ({
+            noteId: item.note_id || item.noteId, // fallback just in case
+            noteType: item.note_type || item.noteType || 'AUDIO', // infer default
+            stt: item.stt,
+            jobId: item.job_id || item.jobId,
+            status: (item.status?.toUpperCase() as NoteStatus) || 'PROCESSING',
+            noteback: item.noteback,
+            createdAt: item.created_at || item.createdAt || new Date().toISOString(),
+        }));
+        return mappedData;
     }
 );
 
@@ -153,9 +162,15 @@ const noteSlice = createSlice({
             })
             .addCase(uploadAudioNote.fulfilled, (state, action) => {
                 state.loading = false;
+                const jobId = action.payload.job_id || action.payload.jobId;
+
+                if (!jobId) {
+                    console.error('No Job ID received from upload!');
+                }
+
                 const newNote: Note = {
-                    noteId: action.payload.job_id,
-                    jobId: action.payload.job_id,
+                    noteId: jobId,
+                    jobId: jobId,
                     noteType: 'AUDIO',
                     status: 'PROCESSING',
                     stt: null,
@@ -173,11 +188,15 @@ const noteSlice = createSlice({
                 const noteIndex = state.notes.findIndex(n => n.jobId === jobId);
 
                 if (noteIndex !== -1) {
+                    // Normalize status to uppercase to match NoteStatus type
+                    const newStatus = (data.status?.toUpperCase() || state.notes[noteIndex].status) as NoteStatus;
+
                     state.notes[noteIndex] = {
                         ...state.notes[noteIndex],
-                        status: data.status,
-                        stt: data.stt ?? state.notes[noteIndex].stt,
-                        noteback: data.noteback ?? state.notes[noteIndex].noteback,
+                        status: newStatus,
+                        stt: data.stt !== undefined ? data.stt : state.notes[noteIndex].stt,
+                        noteback: data.noteback !== undefined ? data.noteback : state.notes[noteIndex].noteback,
+                        noteId: data.status === 'COMPLETED' ? (data as any).noteId || state.notes[noteIndex].noteId : state.notes[noteIndex].noteId,
                     };
                 }
             });
