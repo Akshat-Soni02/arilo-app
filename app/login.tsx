@@ -1,73 +1,37 @@
 import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { ImageBackground, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import logo from '../assets/images/logo.png';
+import loginBg from '../assets/images/login-page.png';
 import GoogleButton from '../components/button/GoogleButton';
-import { palette } from '../constants/colors';
-import { useColorScheme } from '../hooks/use-color-scheme';
 
 export default function LoginScreen() {
-    const colorScheme = useColorScheme();
-    const themeColors = colorScheme === 'dark' ? palette.dark : palette.light;
-
     return (
-        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-            {/* Logo */}
-            <View style={styles.logoContainer}>
-                <Image
-                    source={logo}
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
+        <ImageBackground
+            source={loginBg}
+            className="flex-1"
+            resizeMode="cover"
+        >
+            <View className="flex-1 justify-between">
+                <View className="justify-start items-center mt-24">
+                    <Text className="text-4xl text-white" style={{ fontFamily: 'EBGaramond-Bold'}}>
+                        Arilo.
+                    </Text>
+                </View>
+                <View className="flex-1 mb-24 justify-end">
+                <View className="px-6 items-center">
+                    <Text className="text-center text-2xl text-white font-medium shadow-sm" style={{ fontFamily: 'EBGaramond-Medium' }}>
+                        Don't let your moments fade away
+                    </Text>
+                    <Text className="text-center text-lg text-gray-200 mt-2 shadow-sm" style={{ fontFamily: 'EBGaramond' }}>
+                        The daily journal that writes itself.
+                    </Text>
+                </View>
+                <View className="mb-12 px-6 items-center ">
+                   <GoogleButton />
+                </View>
+                </View>
             </View>
-
-            {/* App Name */}
-            <Text
-                variant="headlineLarge"
-                style={[styles.appName, { color: themeColors.text }]}
-            >
-                Arilo
-            </Text>
-
-            {/* Tagline */}
-            <Text
-                variant="bodyLarge"
-                style={[styles.tagline, { color: themeColors.textMuted }]}
-            >
-                Your personal voice journal
-            </Text>
-
-            {/* Google Sign In Button */}
-            <View style={styles.buttonContainer}>
-                <GoogleButton />
-            </View>
-        </View>
+        </ImageBackground>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    logoContainer: {
-        marginBottom: 24,
-    },
-    logo: {
-        width: 120,
-        height: 120,
-    },
-    appName: {
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    tagline: {
-        marginBottom: 48,
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        marginTop: 20,
-    },
-});

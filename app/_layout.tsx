@@ -14,6 +14,12 @@ import 'react-native-reanimated';
 import "../global.css";
 
 import {
+  EBGaramond_400Regular,
+  EBGaramond_500Medium,
+  EBGaramond_600SemiBold,
+  EBGaramond_700Bold,
+} from '@expo-google-fonts/eb-garamond';
+import {
   Montserrat_400Regular,
   Montserrat_500Medium,
   Montserrat_600SemiBold,
@@ -86,6 +92,10 @@ export default function RootLayout() {
     'Montserrat-Medium': Montserrat_500Medium,
     'Montserrat-SemiBold': Montserrat_600SemiBold,
     'Montserrat-Bold': Montserrat_700Bold,
+    EBGaramond: EBGaramond_400Regular,
+    'EBGaramond-Medium': EBGaramond_500Medium,
+    'EBGaramond-SemiBold': EBGaramond_600SemiBold,
+    'EBGaramond-Bold': EBGaramond_700Bold,
   });
 
   useEffect(() => {
