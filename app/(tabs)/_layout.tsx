@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../../constants/colors';
-import { useAppSelector } from '../../store/hooks';
+import { useAuth } from '../../context/AuthContext';    
 
 export default function TabLayout() {
 
-    const userInfo = useAppSelector((state) => state.user.userInfo);
+    
     const router = useRouter();
-    const [recordModalVisible, setRecordModalVisible] = useState(false);
+    const {user}= useAuth()
     const MicTabButton = () => (
         <TouchableOpacity
             onPress={() => { router.push('/record') }}
@@ -25,9 +25,9 @@ export default function TabLayout() {
     );
     const ProfileHeader = () => (
         <View style={styles.profile}>
-            {userInfo?.photo ? (
+            {user?.photo ? (
                 <Image
-                    source={{ uri: userInfo.photo }}
+                    source={{ uri: user.photo }}
                     style={styles.avatar}
                 />
             ) : (
@@ -40,7 +40,7 @@ export default function TabLayout() {
                 </View>
             )}
             <Text style={styles.greeting}>
-                Hi, {userInfo?.name?.split(' ')[0] || 'User'}
+                Hi, {user?.name?.split(' ')[0] || 'User'}
             </Text>
         </View>
     );
@@ -49,8 +49,6 @@ export default function TabLayout() {
             <Tabs
                 screenOptions={{
                     headerShown: false,
-                    // headerLeft: () => <ProfileHeader />,
-                    // headerTitleAlign: 'center',
                     tabBarStyle: styles.tabBar,
                     tabBarActiveTintColor: palette.light.primary,
                     tabBarInactiveTintColor:
@@ -71,6 +69,7 @@ export default function TabLayout() {
                     name="tasks"
                     options={{
                         title: 'Tasks',
+                        headerShown: false,
                         tabBarIcon: ({ color }) => (
                             <Ionicons
                                 name="checkbox"
@@ -115,9 +114,9 @@ export default function TabLayout() {
                     options={{
                         title: 'Profile',
                         tabBarIcon: ({ color }) => (
-                            userInfo?.photo ? (
+                            user?.photo ? (
                                 <Image
-                                    source={{ uri: userInfo.photo }}
+                                    source={{ uri: user.photo }}
                                     style={{ width: 22, height: 22, borderRadius: 11 }}
                                 />
                             ) : (

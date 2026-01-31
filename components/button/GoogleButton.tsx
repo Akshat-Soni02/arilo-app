@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import {
   GoogleSignin,
   statusCodes,
@@ -6,10 +5,10 @@ import {
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { palette } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { useAppDispatch } from '../../store/hooks';
 import { loginWithGoogle } from '../../store/slices/userSlice';
-import { palette } from '../../constants/colors';
 
 // Configure Google Sign-In once at module level
 GoogleSignin.configure({
@@ -31,7 +30,7 @@ export const handleGoogleSignOut = async (logout?: () => void) => {
 };
 
 const GoogleButton = () => {
-  const { setToken } = useAuth();
+  const { setAuthData } = useAuth();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -56,7 +55,17 @@ const GoogleButton = () => {
       if (loginWithGoogle.fulfilled.match(resultAction)) {
         const data = resultAction.payload;
         const tokenToStore = data.type && data.token ? `${data.type} ${data.token}` : data.token;
-        await setToken(tokenToStore);
+
+        // Construct UserInfo object from login payload
+        const userInfo = {
+          id: data.userId,
+          email: data.email,
+          name: data.name,
+          photo: data.profilePictureUrl,
+          subscription: data.subscription
+        };
+
+        await setAuthData(tokenToStore, userInfo);
         router.replace('/(tabs)');
       } else {
         if (resultAction.payload) {
@@ -85,44 +94,44 @@ const GoogleButton = () => {
   };
 
   return (
-  <View className="items-center">
-    <TouchableOpacity
-      onPress={handleSignIn}
-      disabled={isSigningIn}
-      className="flex-row mt-4 items-center justify-between bg-white px-4 py-3 rounded-2xl shadow-md w-42"
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.08,
-        backgroundColor:palette.light.primary,
-        shadowRadius: 8,
-        elevation: 4,
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.06)'
-      }}
-    >
-      {/* Left Content */}
-      <View className="flex-row justify-between items-center">
-        <View className="flex justify-center items-center bg-white rounded-full p-1 mr-2">
-        <Image
-          source={require('../../assets/images/google-logo.png')}
-          style={{ width: 15, height: 15 }}
-          resizeMode="contain"
-        />
+    <View className="items-center">
+      <TouchableOpacity
+        onPress={handleSignIn}
+        disabled={isSigningIn}
+        className="flex-row mt-4 items-center justify-between bg-white px-4 py-3 rounded-2xl shadow-md w-42"
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.08,
+          backgroundColor: palette.light.primary,
+          shadowRadius: 8,
+          elevation: 4,
+          borderWidth: 1,
+          borderColor: 'rgba(0,0,0,0.06)'
+        }}
+      >
+        {/* Left Content */}
+        <View className="flex-row justify-between items-center">
+          <View className="flex justify-center items-center bg-white rounded-full p-1 mr-2">
+            <Image
+              source={require('../../assets/images/google-logo.png')}
+              style={{ width: 15, height: 15 }}
+              resizeMode="contain"
+            />
+          </View>
+          <Text
+            className="text-white text-base"
+            style={{ fontFamily: 'Montserrat-Medium' }}
+          >
+            Continue
+          </Text>
         </View>
-        <Text
-          className="text-white text-base"
-          style={{ fontFamily: 'Montserrat-Medium' }}
-        >
-          Continue
-        </Text>
-      </View>
 
-    
-     
-    </TouchableOpacity>
-  </View>
-);
+
+
+      </TouchableOpacity>
+    </View>
+  );
 };
 
 export default GoogleButton;

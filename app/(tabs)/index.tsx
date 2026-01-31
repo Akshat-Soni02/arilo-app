@@ -182,7 +182,7 @@ export default function HomeScreen() {
                 </View>
 
                 <View className="flex-col items-center justify-center">
-                    <Text variant="headlineMedium" className="text-gray-800 font-bold mb-1 text-center ">
+                    <Text variant="headlineMedium" className="text-gray-800 font-bold mb-1 text-center" style={{ fontFamily: 'EBGaramond-Bold' }}>
                         Your Notes
                     </Text>
                     <Text variant="bodyMedium" className="text-gray-500 text-center">

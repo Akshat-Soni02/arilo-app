@@ -43,53 +43,75 @@ export default function Organize() {
         }
     };
 
+    type FolderItem = Tag | { id: 'add-new'; isAddButton: true };
+
     const filteredTags = tags.filter(tag =>
         tag.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const renderFolder = ({ item }: { item: Tag }) => (
-        <TouchableOpacity
-            className="bg-white rounded-2xl p-5 m-2 border border-gray-100 shadow-sm flex-1"
-            style={{ minWidth: '45%', maxWidth: '48%' }}
-            activeOpacity={0.7}
-            onPress={() => {
-                router.push({
-                    pathname: '/tag-notes',
-                    params: { tagId: item.id, tagName: item.name }
-                });
-            }}
-        >
-            <View className="items-center">
-                {/* Folder Icon */}
-                <Ionicons name="folder" size={64} color={palette.light.primary} />
+    const gridData: FolderItem[] = [
+        { id: 'add-new', isAddButton: true },
+        ...filteredTags
+    ];
 
-                {/* Tag Name */}
-                <Text
-                    variant="bodyLarge"
-                    className="text-gray-800 font-medium mt-3 text-center"
-                    numberOfLines={2}
+    const renderFolder = ({ item }: { item: FolderItem }) => {
+        if ('isAddButton' in item) {
+            return (
+                <TouchableOpacity
+                    className="rounded-2xl mt-6 ml-6 flex-1 items-center justify-center border-2 border-dashed border-gray-300"
+                    style={{ minWidth: '20%', maxWidth: '25%', aspectRatio: 1 }}
+                    activeOpacity={0.7}
+                    onPress={() => setIsModalVisible(true)}
                 >
-                    {item.name}
-                </Text>
+                    <Ionicons name="add-circle-outline" size={32} color={palette.light.primary} />
+                    <Text
+                        variant="bodyMedium"
+                        className="text-gray-500 mt-1 text-center"
+                        style={{ fontFamily: 'EBGaramond-Bold' }}
+                    >
+                        Create
+                    </Text>
+                </TouchableOpacity>
+            );
+        }
 
-                {/* Optional: Creation Date */}
-                <Text variant="bodySmall" className="text-gray-400 mt-1">
-                    {new Date(item.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                    })}
-                </Text>
-            </View>
-        </TouchableOpacity>
-    );
+        return (
+            <TouchableOpacity
+                className="rounded-2xl p-2 m-1 flex-1 items-center justify-center"
+                style={{ minWidth: '30%', maxWidth: '32%', aspectRatio: 1 }}
+                activeOpacity={0.7}
+                onPress={() => {
+                    router.push({
+                        pathname: '/tag-notes',
+                        params: { tagId: item.id, tagName: item.name }
+                    });
+                }}
+            >
+                <View className="items-center">
+                    {/* Folder Icon */}
+                    <Ionicons name="folder-open" size={40} color={palette.light.primary} />
+
+                    {/* Tag Name */}
+                    <Text
+                        variant="bodyMedium"
+                        className="text-gray-800 mt-2 text-center"
+                        numberOfLines={2}
+                        style={{ fontFamily: 'EBGaramond-Bold' }}
+                    >
+                        {item.name}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
 
     const renderEmptyState = () => (
         <View className="flex-1 items-center justify-center py-12">
             <Ionicons name="folder-open-outline" size={64} color="#9CA3AF" />
-            <Text variant="titleMedium" className="text-gray-500 mt-4">
+            <Text variant="titleMedium" className="text-gray-500 mt-4" style={{ fontFamily: 'EBGaramond-Bold' }}>
                 No tags found
             </Text>
-            <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8">
+            <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8" style={{ fontFamily: 'EBGaramond' }}>
                 {searchQuery
                     ? 'Try a different search term'
                     : 'Create your first tag to organize your tasks'}
@@ -100,29 +122,30 @@ export default function Organize() {
     return (
         <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
             {/* Header */}
-            <View className="px-4 py-3 flex-row items-center justify-center bg-white border-b border-gray-100">
-                <Text variant="headlineSmall" className="text-gray-800 font-medium text-center">
-                    Your Memories
-                </Text>
+            <View className="px-6 py-6 mt-12">
+                <View className="items-start">
+                    <Text variant="headlineMedium" className="text-gray-800 mb-1" style={{ fontFamily: 'EBGaramond-Bold' }}>
+                        Your Memories
+                    </Text>
+                </View>
             </View>
 
             {/* Search Bar */}
-            <View className="px-4 py-3 bg-white border-b border-gray-100">
+            <View className="px-4 py-3">
                 <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
-
                     <TextInput
-                        placeholder="Search tags..."
+                        placeholder="Are you looking for something?"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         className="flex-1 ml-2 text-gray-800"
                         placeholderTextColor="#9CA3AF"
+                        style={{ fontFamily: 'EBGaramond' }}
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
                             <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                         </TouchableOpacity>
                     )}
-
                     <View
                         className="ml-2 p-2 rounded-lg"
                         style={{ backgroundColor: palette.dark.primary }}
@@ -130,7 +153,6 @@ export default function Organize() {
                         <Ionicons name="search" size={20} color={palette.dark.text} />
                     </View>
                 </View>
-
             </View>
 
             {/* Content */}
@@ -161,14 +183,14 @@ export default function Organize() {
                 </View>
             ) : (
                 <FlatList
-                    data={filteredTags}
+                    data={gridData}
                     renderItem={renderFolder}
                     keyExtractor={(item, index) => `${item.id}-${index}`}
-                    numColumns={2}
+                    numColumns={3}
                     contentContainerStyle={{
-                        paddingHorizontal: 8,
-                        paddingTop: 8,
-                        paddingBottom: 20,
+                        paddingHorizontal: 4,
+                        paddingTop: 4,
+                        paddingBottom: 4,
                         flexGrow: 1
                     }}
                     columnWrapperStyle={{
@@ -178,27 +200,6 @@ export default function Organize() {
                     showsVerticalScrollIndicator={false}
                 />
             )}
-
-            {/* Floating Action Button */}
-            <TouchableOpacity
-                className="absolute bottom-6 right-6 rounded-full shadow-lg"
-                style={{
-                    backgroundColor: palette.light.primary,
-                    width: 60,
-                    height: 60,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    elevation: 5,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                }}
-                activeOpacity={0.8}
-                onPress={() => setIsModalVisible(true)}
-            >
-                <Ionicons name="add" size={32} color="white" />
-            </TouchableOpacity>
 
             {/* Create Tag Modal */}
             <Modal

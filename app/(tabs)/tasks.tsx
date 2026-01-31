@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, SectionList, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
+import { useAuth } from '../../context/AuthContext';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { deleteTask, fetchTasks, Task, TaskStatus, updateTask } from '../../store/slices/taskSlice';
 
@@ -13,6 +15,9 @@ export default function TaskScreen() {
     const { tasks, loading, error } = useAppSelector((state) => state.tasks);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [areCompletedTasksExpanded, setAreCompletedTasksExpanded] = useState(false);
+    const { user } = useAuth();
+
 
     useEffect(() => {
         loadTasks();
@@ -24,6 +29,13 @@ export default function TaskScreen() {
 
     const handleStatusToggle = async (task: Task) => {
         const newStatus: TaskStatus = task.status === 'DONE' ? 'IN_PROGRESS' : 'DONE';
+
+        if (newStatus === 'DONE') {
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+
         dispatch(updateTask({ taskId: task.id, updates: { status: newStatus } }));
     };
 
@@ -66,7 +78,6 @@ export default function TaskScreen() {
         const today = new Date();
         const newDate = new Date(selectedDate);
         newDate.setDate(newDate.getDate() + 1);
-
         // Don't allow going beyond today
         if (newDate <= today) {
             setSelectedDate(newDate);
@@ -93,14 +104,29 @@ export default function TaskScreen() {
     // DONE tasks are filtered by the selected date
     const doneTasks = filteredByDate.filter(task => task.status === 'DONE');
 
-    // Combine with IN_PROGRESS first, then DONE
-    const organizedTasks = [...inProgressTasks, ...doneTasks];
+    const completedSectionData = (doneTasks.length > 3 && !areCompletedTasksExpanded)
+        ? []
+        : doneTasks;
+
+    const sections = [
+        {
+            title: 'Active',
+            data: inProgressTasks,
+            totalCount: inProgressTasks.length
+        },
+        {
+            title: 'Completed Tasks',
+            data: completedSectionData,
+            totalCount: doneTasks.length
+        }
+    ].filter(section => section.totalCount > 0);
 
     const renderTask = ({ item }: { item: Task }) => {
         const isDone = item.status === 'DONE';
 
         return (
             <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+
                 <View className="flex-row items-center">
                     {/* Checkbox */}
                     <TouchableOpacity
@@ -153,29 +179,59 @@ export default function TaskScreen() {
             <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8">
                 {searchQuery
                     ? 'Try a different search term'
-                    : `No tasks for ${getDateLabel(selectedDate)}`}
+                    : `You are all caught up for ${getDateLabel(selectedDate)}, ${user?.name?.split(' ')[0]}`}
             </Text>
         </View>
     );
 
-    const taskCount = organizedTasks.length;
+    const renderSectionHeader = ({ section: { title, totalCount } }: { section: { title: string, data: Task[], totalCount: number } }) => {
+        const isExpandable = title === 'Completed Tasks' && totalCount > 3;
+
+        if (isExpandable) {
+            return (
+                <TouchableOpacity
+                    onPress={() => setAreCompletedTasksExpanded(!areCompletedTasksExpanded)}
+                    className="mt-6 mb-4 px-1 flex-row items-center justify-between"
+                    activeOpacity={0.7}
+                >
+                    <View className="flex-row items-center">
+                        <Text variant="titleMedium" className="text-gray-800 mr-2" style={{ fontFamily: 'EBGaramond-Bold' }}>
+                            {title} <Text className="text-gray-400 text-sm" style={{ fontFamily: 'EBGaramond' }}>({totalCount})</Text>
+                        </Text>
+                        <Ionicons
+                            name={areCompletedTasksExpanded ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#9CA3AF"
+                        />
+                    </View>
+                </TouchableOpacity>
+            );
+        }
+
+        return (
+            <View className="mt-6 mb-4 px-1">
+                <Text variant="titleMedium" className="text-gray-800" style={{ fontFamily: 'EBGaramond-Bold' }}>
+                    {title} <Text className="text-gray-400 text-sm" style={{ fontFamily: 'EBGaramond' }}>({totalCount})</Text>
+                </Text>
+            </View>
+        );
+    };
+
+    const taskCount = inProgressTasks.length + doneTasks.length;
 
     return (
         <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
             {/* Header */}
-            <View className="px-4 py-4 bg-white border-b border-gray-100">
-                <View className="items-center">
-                    <Text variant="headlineMedium" className="text-gray-800 font-bold">
-                        Task Journal
-                    </Text>
-                    <Text variant="bodyMedium" className="text-gray-500 mt-1">
-                        {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            <View className="px-6 py-6 mt-12">
+                <View className="items-start">
+                    <Text variant="headlineMedium" className="text-gray-800 mb-1" style={{ fontFamily: 'EBGaramond-Bold' }}>
+                        Daily Journal
                     </Text>
                 </View>
             </View>
 
             {/* Search Bar */}
-            <View className="px-4 py-3 bg-white">
+            <View className="px-4 py-3">
                 <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
                     <TextInput
                         placeholder="What's in your mind?"
@@ -183,6 +239,7 @@ export default function TaskScreen() {
                         onChangeText={setSearchQuery}
                         className="flex-1 ml-2 text-gray-800"
                         placeholderTextColor="#9CA3AF"
+                        style={{ fontFamily: 'EBGaramond' }}
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
@@ -200,7 +257,7 @@ export default function TaskScreen() {
 
 
             {/* Date Navigation */}
-            <View className="px-4 py-3 bg-white border-b border-gray-100">
+            <View className="px-4 py-3 border-b border-gray-100">
                 <View className="flex-row items-center justify-between">
                     <TouchableOpacity
                         onPress={goToPreviousDay}
@@ -262,9 +319,10 @@ export default function TaskScreen() {
                 </View>
             ) : (
                 <View className="flex-1">
-                    <FlatList
-                        data={organizedTasks}
+                    <SectionList
+                        sections={sections}
                         renderItem={renderTask}
+                        renderSectionHeader={renderSectionHeader}
                         keyExtractor={(item) => item.id}
                         contentContainerStyle={{
                             paddingHorizontal: 16,
@@ -273,7 +331,18 @@ export default function TaskScreen() {
                             flexGrow: 1
                         }}
                         ListEmptyComponent={renderEmptyState}
+                        ListHeaderComponent={() => (
+                            inProgressTasks.length === 0 && doneTasks.length > 0 && !searchQuery ? (
+                                <View className="items-center justify-center py-12">
+                                    <Ionicons name="checkbox-outline" size={64} color="#9CA3AF" />
+                                    <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8">
+                                        You are all caught up for {getDateLabel(selectedDate)}, {user?.name?.split(' ')[0]}
+                                    </Text>
+                                </View>
+                            ) : null
+                        )}
                         showsVerticalScrollIndicator={false}
+                        stickySectionHeadersEnabled={false}
                     />
                 </View>
             )}

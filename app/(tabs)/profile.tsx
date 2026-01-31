@@ -10,13 +10,11 @@ import { handleGoogleSignOut } from '../../components/button/GoogleButton';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
-import { useAppSelector } from '../../store/hooks';
 
 export default function Profile() {
-    const { logout } = useAuth();
+    const { user,logout } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const userInfo = useAppSelector((state) => state.user.userInfo);
 
     const onLogout = async () => {
         await handleGoogleSignOut(logout);
@@ -90,9 +88,9 @@ export default function Profile() {
                 <View className="flex-row items-center justify-between mb-8">
                     <View className="flex-row items-center">
                         <View className="mr-4">
-                            {userInfo?.photo ? (
+                            {user?.photo ? (
                                 <Image
-                                    source={{ uri: userInfo.photo }}
+                                    source={{ uri: user.photo }}
                                     className="w-20 h-20 rounded-full bg-gray-100"
                                 />
                             ) : (
@@ -103,10 +101,10 @@ export default function Profile() {
                         </View>
                         <View>
                             <Text className="text-xl font-bold text-[#2d2d2d] mb-1" style={{ fontFamily: 'Montserrat-Bold' }}>
-                                {userInfo?.name || 'User'}
+                                {user?.name || 'User'}
                             </Text>
                             <Text className="text-sm text-gray-400" style={{ fontFamily: 'Montserrat' }}>
-                                {userInfo?.email || 'Email not available'}
+                                {user?.email || 'Email not available'}
                             </Text>
                         </View>
                     </View>
@@ -156,12 +154,12 @@ export default function Profile() {
                         <InfoCard
                             icon="calendar-outline"
                             label="Daily Note Limit"
-                            value={userInfo?.subscription?.noteDailyLimit ?? 0}
+                            value={user?.subscription?.noteDailyLimit ?? 0}
                         />
                         <InfoCard
                             icon="layers-outline"
                             label="Monthly Note Limit"
-                            value={userInfo?.subscription?.noteMonthlyLimit ?? 0}
+                            value={user?.subscription?.noteMonthlyLimit ?? 0}
                         />
                     </View>
                 </View>
