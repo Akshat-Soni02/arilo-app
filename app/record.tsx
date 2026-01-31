@@ -199,7 +199,6 @@ export default function RecordModal() {
       if (uri) {
         // Upload audio note using Redux thunk
         const result = await dispatch(uploadAudioNote(uri)).unwrap();
-        console.log('Upload successful:', result);
         Alert.alert('Success', 'Audio note uploaded successfully!');
       }
 

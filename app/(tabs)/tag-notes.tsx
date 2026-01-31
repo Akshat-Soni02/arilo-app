@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { ActivityIndicator, FlatList, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
+import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchNotesByTag, Note } from '../../store/slices/tagSlice';
 
@@ -43,20 +44,49 @@ export default function TagNotesScreen() {
     };
 
     const renderNote = ({ item }: { item: Note }) => (
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-            <View className="mb-2">
-                <Text variant="bodyLarge" className="text-gray-800 leading-6">
-                    {item.stt}
+        <View className="bg-white rounded-3xl overflow-hidden mb-4" style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 5
+        }}>
+            {/* User Message */}
+            <View className="p-5">
+                <View className="flex-row items-center mb-3">
+                    <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
+                        <Ionicons name="mic" size={16} color={palette.light.primary} />
+                    </View>
+                </View>
+                <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
+                    {item.stt || 'No transcription available'}
                 </Text>
+                <View className="flex-row items-center justify-between mt-2">
+                    <Text variant="bodySmall" className="text-gray-400">
+                        {formatDate(item.createdAt)}
+                    </Text>
+                    <Text variant="bodySmall" className="text-gray-400">
+                        {formatTime(item.createdAt)}
+                    </Text>
+                </View>
             </View>
-            <View className="flex-row items-center justify-between">
-                <Text variant="bodySmall" className="text-gray-400">
-                    {formatDate(item.createdAt)}
-                </Text>
-                <Text variant="bodySmall" className="text-gray-400">
-                    {formatTime(item.createdAt)}
-                </Text>
-            </View>
+
+            {/* AI Summary */}
+            {item.noteback && (
+                <View className="px-5 pb-5">
+                    <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
+                        <View className="flex-row items-center mb-2">
+                            <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
+                            <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
+                                Arilo says:
+                            </Text>
+                        </View>
+                        <Text variant="bodyMedium" className="text-gray-700 leading-5">
+                            {item.noteback}
+                        </Text>
+                    </View>
+                </View>
+            )}
         </View>
     );
 
@@ -123,7 +153,7 @@ export default function TagNotesScreen() {
                     contentContainerStyle={{
                         paddingHorizontal: 16,
                         paddingTop: 8,
-                        paddingBottom: 20,
+                        paddingBottom: 120,
                         flexGrow: 1
                     }}
                     ListEmptyComponent={renderEmptyState}

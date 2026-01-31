@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, Linking, ScrollView, TouchableOpacity, View } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,11 +10,22 @@ import { handleGoogleSignOut } from '../../components/button/GoogleButton';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { fetchNoteUsage } from '../../store/slices/noteSlice';
+
 
 export default function Profile() {
-    const { user,logout } = useAuth();
+    const { user, logout } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+
+    const dispatch = useAppDispatch();
+    const { usage } = useAppSelector((state) => state.notes);
+
+    useEffect(() => {
+        dispatch(fetchNoteUsage());
+    }, []);
+
 
     const onLogout = async () => {
         await handleGoogleSignOut(logout);
@@ -154,12 +165,12 @@ export default function Profile() {
                         <InfoCard
                             icon="calendar-outline"
                             label="Daily Note Limit"
-                            value={user?.subscription?.noteDailyLimit ?? 0}
+                            value={usage ? `${usage.dailyUsed}/${usage.dailyLimit}` : '0/0'}
                         />
                         <InfoCard
                             icon="layers-outline"
                             label="Monthly Note Limit"
-                            value={user?.subscription?.noteMonthlyLimit ?? 0}
+                            value={usage ? `${usage.monthlyUsed}/${usage.monthlyLimit}` : '0/0'}
                         />
                     </View>
                 </View>

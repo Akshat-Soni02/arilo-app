@@ -1,19 +1,48 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../../constants/colors';
-import { useAuth } from '../../context/AuthContext';    
+import { useAuth } from '../../context/AuthContext';
+import { useAppDispatch } from '../../store/hooks';
+import { fetchNoteUsage } from '../../store/slices/noteSlice';
 
 export default function TabLayout() {
 
-    
+
     const router = useRouter();
-    const {user}= useAuth()
+    const { user } = useAuth();
+    const dispatch = useAppDispatch();
+
+    const handleRecordPress = async () => {
+        try {
+            const resultAction = await dispatch(fetchNoteUsage());
+            if (fetchNoteUsage.fulfilled.match(resultAction)) {
+                const usageData = resultAction.payload;
+                if (usageData.status === 'REACHED') {
+                    Alert.alert(
+                        'Limit Reached',
+                        'You have reached your daily or monthly note limit. Please upgrade your plan or wait for the limit to reset.'
+                    );
+                    return;
+                }
+            }
+            router.push('/record');
+        } catch (error) {
+            console.error('Failed to check usage limit:', error);
+            // On error, let them try? Or block? usually let them try or show error.
+            // Let's verify with the prompt "based upon status that show alert".
+            // If fetch fails, we probably shouldn't block, or we should show connection error.
+            // For now, I'll allow it if check fails to avoid blocking valid users on network blip, 
+            // unless strict enforcement is needed. The server will reject upload anyway.
+            router.push('/record');
+        }
+    };
+
     const MicTabButton = () => (
         <TouchableOpacity
-            onPress={() => { router.push('/record') }}
+            onPress={handleRecordPress}
             style={styles.micWrapper}
             activeOpacity={0.9}
         >
@@ -90,7 +119,7 @@ export default function TabLayout() {
                         tabPress: (e) => {
                             // @ts-ignore
                             e.preventDefault(); // Prevent actual tab navigation
-                            router.push('/record');
+                            handleRecordPress();
                         },
                     })}
                 />

@@ -14,8 +14,19 @@ export interface Note {
     createdAt: string;
 }
 
+export interface NoteUsage {
+    dailyUsed: number;
+    dailyLimit: number;
+    monthlyUsed: number;
+    monthlyLimit: number;
+    status: 'OK' | 'REACHED';
+}
+
+
+
 interface NoteState {
     notes: Note[];
+    usage: NoteUsage | null;
     loading: boolean;
     error: string | null;
 }
@@ -24,6 +35,7 @@ const TOKEN_KEY = 'auth_token';
 
 const initialState: NoteState = {
     notes: [],
+    usage: null,
     loading: false,
     error: null,
 };
@@ -52,8 +64,8 @@ export const fetchNotes = createAsyncThunk(
 
         const data = await response.json();
         const mappedData: Note[] = data.map((item: any) => ({
-            noteId: item.note_id || item.noteId, // fallback just in case
-            noteType: item.note_type || item.noteType || 'AUDIO', // infer default
+            noteId: item.note_id || item.noteId,
+            noteType: item.note_type || item.noteType || 'AUDIO',
             stt: item.stt,
             jobId: item.job_id || item.jobId,
             status: (item.status?.toUpperCase() as NoteStatus) || 'PROCESSING',
@@ -122,6 +134,38 @@ export const pollNoteStatus = createAsyncThunk(
 
         const data: PollResponse = await response.json();
         return { jobId, data };
+    }
+);
+
+
+
+// Async thunk to fetch note usage
+export const fetchNoteUsage = createAsyncThunk(
+    'notes/fetchNoteUsage',
+    async () => {
+        try {
+            const token = await AsyncStorage.getItem(TOKEN_KEY);
+            const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/usage`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token || '',
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to fetch note usage:', errorText);
+                throw new Error('Failed to fetch note usage');
+            }
+
+            const data: NoteUsage = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error in fetchNoteUsage:', error);
+            throw error;
+        }
     }
 );
 
@@ -199,6 +243,9 @@ const noteSlice = createSlice({
                         noteId: data.status === 'COMPLETED' ? (data as any).noteId || state.notes[noteIndex].noteId : state.notes[noteIndex].noteId,
                     };
                 }
+            })
+            .addCase(fetchNoteUsage.fulfilled, (state, action) => {
+                state.usage = action.payload;
             });
     },
 });

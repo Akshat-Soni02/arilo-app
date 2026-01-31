@@ -2,18 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
 import { Text } from 'react-native-paper';
-
+import { CircularProgress } from '../../components/CircularProgress';
 import SafeAreaWrapper from "../../components/safe-area-wrapper";
 import { SkeletonNoteCard } from '../../components/SkeletonNoteCard';
 import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchNotes, markNoteAsFailed, pollNoteStatus } from '../../store/slices/noteSlice';
-
+import { fetchNotes, fetchNoteUsage, markNoteAsFailed, pollNoteStatus } from '../../store/slices/noteSlice';
 export default function HomeScreen() {
 
 
     const dispatch = useAppDispatch();
-    const { notes, loading, error } = useAppSelector((state) => state.notes);
+    const { notes, loading, error, usage } = useAppSelector((state) => state.notes);
     const [refreshing, setRefreshing] = useState(false);
 
     const displayedNotes = notes
@@ -35,7 +34,14 @@ export default function HomeScreen() {
                             dispatch(markNoteAsFailed(note.jobId));
                         }
                     } else if (note.jobId) {
-                        dispatch(pollNoteStatus(note.jobId));
+                        dispatch(pollNoteStatus(note.jobId)).then((action) => {
+                            if (pollNoteStatus.fulfilled.match(action)) {
+                                const { data } = action.payload;
+                                if (data.status === 'COMPLETED') {
+                                    dispatch(fetchNoteUsage());
+                                }
+                            }
+                        });
                     }
                 });
             }, 2000);
@@ -50,11 +56,15 @@ export default function HomeScreen() {
 
     const loadNotes = () => {
         dispatch(fetchNotes());
+        dispatch(fetchNoteUsage());
     };
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await dispatch(fetchNotes());
+        await Promise.all([
+            dispatch(fetchNotes()),
+            dispatch(fetchNoteUsage())
+        ]);
         setRefreshing(false);
     };
 
@@ -79,7 +89,8 @@ export default function HomeScreen() {
     };
 
     const renderNoteCard = (note: any) => {
-        if (note.status === 'PROCESSING') {
+        // Show skeleton only if we have absolutely no data yet
+        if (note.status === 'PROCESSING' && !note.stt && !note.noteback) {
             return <SkeletonNoteCard note={note} />;
         }
         return (
@@ -170,8 +181,7 @@ export default function HomeScreen() {
     return (
         <SafeAreaWrapper className="flex-1" edges={['top']}>
             <View className="px-6">
-                <View className="flex-row items-center justify-center mb-4">
-
+                <View className="flex-row items-center justify-between mb-4">
                     <View className="flex-row items-center">
                         <View className="px-4 py-2 rounded-full" style={{ backgroundColor: palette.light.primary + '15' }}>
                             <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary, fontFamily: 'Inter_600SemiBold' }}>
@@ -179,6 +189,10 @@ export default function HomeScreen() {
                             </Text>
                         </View>
                     </View>
+
+                    {usage && (
+                        <CircularProgress used={usage.dailyUsed} limit={usage.dailyLimit} />
+                    )}
                 </View>
 
                 <View className="flex-col items-center justify-center">

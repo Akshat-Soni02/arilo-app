@@ -75,16 +75,14 @@ export default function Organize() {
             );
         }
 
+        const tag = item as Tag;
         return (
             <TouchableOpacity
                 className="rounded-2xl p-2 m-1 flex-1 items-center justify-center"
                 style={{ minWidth: '30%', maxWidth: '32%', aspectRatio: 1 }}
                 activeOpacity={0.7}
                 onPress={() => {
-                    router.push({
-                        pathname: '/tag-notes',
-                        params: { tagId: item.id, tagName: item.name }
-                    });
+                    router.push(`/tag-notes?tagId=${tag.tagId}&tagName=${encodeURIComponent(tag.name)}`);
                 }}
             >
                 <View className="items-center">
@@ -98,7 +96,7 @@ export default function Organize() {
                         numberOfLines={2}
                         style={{ fontFamily: 'EBGaramond-Bold' }}
                     >
-                        {item.name}
+                        {tag.name}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -185,7 +183,7 @@ export default function Organize() {
                 <FlatList
                     data={gridData}
                     renderItem={renderFolder}
-                    keyExtractor={(item, index) => `${item.id}-${index}`}
+                    keyExtractor={(item, index) => ('isAddButton' in item ? item.id : item.tagId)}
                     numColumns={3}
                     contentContainerStyle={{
                         paddingHorizontal: 4,
