@@ -5,10 +5,13 @@ import { ActivityIndicator, FlatList, TouchableOpacity, View } from 'react-nativ
 import { Text } from 'react-native-paper';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchNotesByTag, Note } from '../../store/slices/tagSlice';
 
 export default function TagNotesScreen() {
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
     const { tagId, tagName } = useLocalSearchParams<{ tagId: string; tagName: string }>();
     const dispatch = useAppDispatch();
     const { notes, notesLoading, error } = useAppSelector((state) => state.tags);
@@ -44,7 +47,8 @@ export default function TagNotesScreen() {
     };
 
     const renderNote = ({ item }: { item: Note }) => (
-        <View className="bg-white rounded-3xl overflow-hidden mb-4" style={{
+        <View className="rounded-3xl overflow-hidden mb-4" style={{
+            backgroundColor: colors.surface,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.08,
@@ -54,18 +58,18 @@ export default function TagNotesScreen() {
             {/* User Message */}
             <View className="p-5">
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
-                        <Ionicons name="mic" size={16} color={palette.light.primary} />
+                    <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: colors.primary + '20' }}>
+                        <Ionicons name="mic" size={16} color={colors.primary} />
                     </View>
                 </View>
-                <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
+                <Text variant="bodyLarge" className="leading-6 mb-2" style={{ color: colors.text }}>
                     {item.stt || 'No transcription available'}
                 </Text>
                 <View className="flex-row items-center justify-between mt-2">
-                    <Text variant="bodySmall" className="text-gray-400">
+                    <Text variant="bodySmall" style={{ color: colors.textMuted }}>
                         {formatDate(item.createdAt)}
                     </Text>
-                    <Text variant="bodySmall" className="text-gray-400">
+                    <Text variant="bodySmall" style={{ color: colors.textMuted }}>
                         {formatTime(item.createdAt)}
                     </Text>
                 </View>
@@ -74,14 +78,14 @@ export default function TagNotesScreen() {
             {/* AI Summary */}
             {item.noteback && (
                 <View className="px-5 pb-5">
-                    <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
+                    <View className="rounded-2xl p-4" style={{ backgroundColor: colors.warningBg }}>
                         <View className="flex-row items-center mb-2">
-                            <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
-                            <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
+                            <Ionicons name="sparkles" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                            <Text variant="bodySmall" className="font-semibold" style={{ color: colors.primary }}>
                                 Arilo says:
                             </Text>
                         </View>
-                        <Text variant="bodyMedium" className="text-gray-700 leading-5">
+                        <Text variant="bodyMedium" className="leading-5" style={{ color: colors.text }}>
                             {item.noteback}
                         </Text>
                     </View>
@@ -92,56 +96,57 @@ export default function TagNotesScreen() {
 
     const renderEmptyState = () => (
         <View className="flex-1 items-center justify-center py-12">
-            <Ionicons name="document-text-outline" size={64} color="#9CA3AF" />
-            <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8">
+            <Ionicons name="document-text-outline" size={64} color={colors.gray400} />
+            <Text variant="bodyMedium" className="mt-2 text-center px-8" style={{ color: colors.textMuted }}>
                 No notes have been created with this tag yet
             </Text>
         </View>
     );
 
     return (
-        <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
+        <SafeAreaWrapper className="flex-1" edges={['top']} style={{ backgroundColor: colors.background }}>
             {/* Header */}
-            <View className="px-4 py-3 flex-row items-center bg-white border-b border-gray-100">
+            <View className="px-4 py-3 flex-row items-center border-b" style={{ backgroundColor: colors.surface, borderColor: colors.border }}>
                 <TouchableOpacity onPress={() => router.push('/organize')} className="p-2 mr-2">
-                    <Ionicons name="arrow-back" size={24} color="#6B7280" />
+                    <Ionicons name="arrow-back" size={24} color={colors.gray500} />
                 </TouchableOpacity>
                 <View className="flex-1">
-                    <Text variant="bodySmall" className="text-gray-500">
+                    <Text variant="bodySmall" style={{ color: colors.textMuted }}>
                         Tag
                     </Text>
-                    <Text variant="titleLarge" className="text-gray-800 font-bold">
+                    <Text variant="titleLarge" className="font-bold" style={{ color: colors.text }}>
                         {tagName || 'Notes'}
                     </Text>
                 </View>
                 <TouchableOpacity onPress={loadNotes} className="p-2">
-                    <Ionicons name="refresh" size={24} color="#6B7280" />
+                    <Ionicons name="refresh" size={24} color={colors.gray500} />
                 </TouchableOpacity>
             </View>
 
             {/* Content */}
             {error ? (
                 <View className="flex-1 items-center justify-center px-8">
-                    <Ionicons name="alert-circle" size={64} color="#EF4444" />
-                    <Text variant="titleMedium" className="text-gray-800 mt-4 text-center">
+                    <Ionicons name="alert-circle" size={64} color={colors.error} />
+                    <Text variant="titleMedium" className="mt-4 text-center" style={{ color: colors.text }}>
                         Failed to load notes
                     </Text>
-                    <Text variant="bodyMedium" className="text-gray-500 mt-2 text-center">
+                    <Text variant="bodyMedium" className="mt-2 text-center" style={{ color: colors.textMuted }}>
                         {error}
                     </Text>
                     <TouchableOpacity
                         onPress={loadNotes}
-                        className="mt-6 bg-orange-500 px-6 py-3 rounded-xl"
+                        className="mt-6 px-6 py-3 rounded-xl"
+                        style={{ backgroundColor: colors.primary }}
                     >
-                        <Text variant="bodyLarge" className="text-white font-medium">
+                        <Text variant="bodyLarge" className="font-medium" style={{ color: 'white' }}>
                             Try Again
                         </Text>
                     </TouchableOpacity>
                 </View>
             ) : notesLoading ? (
                 <View className="flex-1 items-center justify-center">
-                    <ActivityIndicator size="large" color="#F97316" />
-                    <Text variant="bodyMedium" className="text-gray-500 mt-4">
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text variant="bodyMedium" className="mt-4" style={{ color: colors.textMuted }}>
                         Loading notes...
                     </Text>
                 </View>
