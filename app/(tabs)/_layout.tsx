@@ -19,6 +19,20 @@ export default function TabLayout() {
 
     const handleRecordPress = async () => {
         try {
+            // First, check audio recording permission
+            const { Audio } = await import('expo-av');
+            const permissionResponse = await Audio.requestPermissionsAsync();
+
+            if (!permissionResponse.granted) {
+                Alert.alert(
+                    'Permission Required',
+                    'Microphone access is required to record audio notes. Please enable it in your device settings.',
+                    [{ text: 'OK' }]
+                );
+                return;
+            }
+
+            // Then check usage limits
             const resultAction = await dispatch(fetchNoteUsage());
             if (fetchNoteUsage.fulfilled.match(resultAction)) {
                 const usageData = resultAction.payload;
@@ -30,14 +44,12 @@ export default function TabLayout() {
                     return;
                 }
             }
+
+            // Only navigate if both permission and usage checks pass
             router.push('/record');
         } catch (error) {
-            console.error('Failed to check usage limit:', error);
-            // On error, let them try? Or block? usually let them try or show error.
-            // Let's verify with the prompt "based upon status that show alert".
-            // If fetch fails, we probably shouldn't block, or we should show connection error.
-            // For now, I'll allow it if check fails to avoid blocking valid users on network blip, 
-            // unless strict enforcement is needed. The server will reject upload anyway.
+            console.error('Failed to check permissions or usage limit:', error);
+            // On error, still allow navigation (server will handle validation)
             router.push('/record');
         }
     };

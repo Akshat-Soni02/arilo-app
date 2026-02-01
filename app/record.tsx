@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
-  AudioModule,
   RecordingPresets,
   setAudioModeAsync,
   useAudioRecorder,
@@ -29,7 +28,7 @@ const WaveVisualizer = ({ audioRecorder, isRecording, colors }: { audioRecorder:
   ).current;
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isRecording && audioRecorder) {
       // Poll metering data
@@ -112,7 +111,7 @@ export default function RecordModal() {
 
   const [recordingTime, setRecordingTime] = useState(0);
   const [uploading, setUploading] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Auto-start recording on mount
   useEffect(() => {
@@ -144,12 +143,9 @@ export default function RecordModal() {
     };
   }, [recorderState.isRecording]);
 
+  // Set audio mode for recording
   useEffect(() => {
     (async () => {
-      const status = await AudioModule.requestRecordingPermissionsAsync();
-      if (!status.granted) {
-        router.back();
-      }
       await setAudioModeAsync({
         playsInSilentMode: true,
         allowsRecording: true,
