@@ -75,7 +75,7 @@ export const fetchNotesByTag = createAsyncThunk(
                 },
                 body: JSON.stringify({
                     tagId: tagId,
-                    order: 'ASC'
+                    order: 'DESC'
                 }),
             });
             

@@ -10,7 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../constants/colors';
 import { useAppDispatch } from '../store/hooks';
@@ -198,8 +198,7 @@ export default function RecordModal() {
 
       if (uri) {
         // Upload audio note using Redux thunk
-        const result = await dispatch(uploadAudioNote(uri)).unwrap();
-        Alert.alert('Success', 'Audio note uploaded successfully!');
+        await dispatch(uploadAudioNote(uri)).unwrap();
       }
 
       router.back();
@@ -233,46 +232,58 @@ export default function RecordModal() {
           {/* Handle */}
           <View className="w-10 h-1 bg-[#E8E4D9] self-center rounded-full mb-4" />
 
-          {/* Timer */}
-          <View className="items-center mb-4">
-            <Text className="text-xl font-semibold text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-SemiBold' }}>
-              {formatTime(recordingTime)}
-            </Text>
-          </View>
-
-          {/* Waveform Visualization */}
-          <View className="mb-4">
-            <WaveVisualizer audioRecorder={audioRecorder} isRecording={recorderState.isRecording} />
-          </View>
-
-          {/* Action Buttons */}
-          <View className="flex-row justify-center items-center gap-16">
-            <TouchableOpacity
-              className="items-center gap-2"
-              onPress={handleDiscard}
-              activeOpacity={0.7}
-            >
-              <View className="w-16 h-16 rounded-full bg-[#FEFDFB] border-[1.5px] border-[#E8E4D9] justify-center items-center shadow-sm">
-                <Ionicons name="close" size={24} color="#2d2d2d" />
-              </View>
-              <Text className="text-xs text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
-                Discard
+          {uploading ? (
+            // Uploading State - Only show loader and text
+            <View className="items-center justify-center py-12">
+              <ActivityIndicator size="large" color="#F07E54" />
+              <Text className="text-xl font-semibold text-[#2d2d2d] mt-4" style={{ fontFamily: 'Montserrat-SemiBold' }}>
+                Uploading...
               </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="items-center gap-2"
-              onPress={handleDone}
-              activeOpacity={0.7}
-            >
-              <View className="w-16 h-16 rounded-full bg-[#F07E54] justify-center items-center shadow-sm">
-                <Ionicons name="checkmark" size={24} color="white" />
+            </View>
+          ) : (
+            <>
+              {/* Timer */}
+              <View className="items-center mb-4">
+                <Text className="text-xl font-semibold text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-SemiBold' }}>
+                  {formatTime(recordingTime)}
+                </Text>
               </View>
-              <Text className="text-xs text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
-                Done
-              </Text>
-            </TouchableOpacity>
-          </View>
+
+              {/* Waveform Visualization */}
+              <View className="mb-4">
+                <WaveVisualizer audioRecorder={audioRecorder} isRecording={recorderState.isRecording} />
+              </View>
+
+              {/* Action Buttons */}
+              <View className="flex-row justify-center items-center gap-16">
+                <TouchableOpacity
+                  className="items-center gap-2"
+                  onPress={handleDiscard}
+                  activeOpacity={0.7}
+                >
+                  <View className="w-16 h-16 rounded-full bg-[#FEFDFB] border-[1.5px] border-[#E8E4D9] justify-center items-center shadow-sm">
+                    <Ionicons name="close" size={24} color="#2d2d2d" />
+                  </View>
+                  <Text className="text-xs text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
+                    Discard
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="items-center gap-2"
+                  onPress={handleDone}
+                  activeOpacity={0.7}
+                >
+                  <View className="w-16 h-16 rounded-full bg-[#F07E54] justify-center items-center shadow-sm">
+                    <Ionicons name="checkmark" size={24} color="white" />
+                  </View>
+                  <Text className="text-xs text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
+                    Done
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </View>
