@@ -8,6 +8,9 @@ import { SkeletonNoteCard } from '../../components/SkeletonNoteCard';
 import { palette } from '../../constants/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchNotes, fetchNoteUsage, markNoteAsFailed, pollNoteStatus } from '../../store/slices/noteSlice';
+import { fetchTags } from '../../store/slices/tagSlice';
+import { fetchTasks } from '../../store/slices/taskSlice';
+
 export default function HomeScreen() {
 
 
@@ -38,7 +41,10 @@ export default function HomeScreen() {
                             if (pollNoteStatus.fulfilled.match(action)) {
                                 const { data } = action.payload;
                                 if (data.status === 'COMPLETED') {
+
                                     dispatch(fetchNoteUsage());
+                                    dispatch(fetchTasks(undefined));
+                                    dispatch(fetchTags());
                                 }
                             }
                         });

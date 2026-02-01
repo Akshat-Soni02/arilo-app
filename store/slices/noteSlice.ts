@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { apiRequest } from '../../utils/apiClient';
 
 export type NoteStatus = 'PROCESSING' | 'COMPLETED' | 'FAILED';
 export type NoteType = 'AUDIO' | 'TEXT';
@@ -44,14 +44,12 @@ const initialState: NoteState = {
 export const fetchNotes = createAsyncThunk(
     'notes/fetchNotes',
     async () => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
         const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/query`;
 
-        const response = await fetch(url, {
+        const response = await apiRequest(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token || '',
             },
             body: JSON.stringify({
                 order: 'ASC'
@@ -80,7 +78,6 @@ export const fetchNotes = createAsyncThunk(
 export const uploadAudioNote = createAsyncThunk(
     'notes/uploadAudioNote',
     async (audioUri: string) => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
         const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/upload`;
 
         const formData = new FormData();
@@ -90,11 +87,8 @@ export const uploadAudioNote = createAsyncThunk(
             name: 'recording.m4a',
         } as any);
 
-        const response = await fetch(url, {
+        const response = await apiRequest(url, {
             method: 'POST',
-            headers: {
-                'Authorization': token || '',
-            },
             body: formData,
         });
 
@@ -118,14 +112,9 @@ interface PollResponse {
 export const pollNoteStatus = createAsyncThunk(
     'notes/pollNoteStatus',
     async (jobId: string) => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
-
         const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/poll?job_id=${jobId}`;
-        const response = await fetch(url, {
+        const response = await apiRequest(url, {
             method: 'GET',
-            headers: {
-                'Authorization': token || '',
-            },
         });
 
         if (!response.ok) {
@@ -144,14 +133,10 @@ export const fetchNoteUsage = createAsyncThunk(
     'notes/fetchNoteUsage',
     async () => {
         try {
-            const token = await AsyncStorage.getItem(TOKEN_KEY);
             const url = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/usage`;
 
-            const response = await fetch(url, {
+            const response = await apiRequest(url, {
                 method: 'GET',
-                headers: {
-                    'Authorization': token || '',
-                },
             });
 
             if (!response.ok) {

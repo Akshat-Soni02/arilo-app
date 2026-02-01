@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { apiRequest } from '../../utils/apiClient';
 
 export type TaskStatus = 'IN_PROGRESS' | 'DELETED' | 'DONE';
 
@@ -33,13 +33,11 @@ export const fetchTasks = createAsyncThunk(
     async (filter?: TaskStatus) => {
         const baseUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/tasks`;
         const url = filter ? `${baseUrl}?filter=${filter}` : baseUrl;
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
 
-        const response = await fetch(url, {
+        const response = await apiRequest(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token
             },
         });
 
@@ -56,12 +54,10 @@ export const fetchTasks = createAsyncThunk(
 export const updateTask = createAsyncThunk(
     'tasks/updateTask',
     async ({ taskId, updates }: { taskId: string; updates: { task?: string; status?: TaskStatus } }) => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tasks/${taskId}`, {
+        const response = await apiRequest(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tasks/${taskId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token,
             },
             body: JSON.stringify(updates),
         });
@@ -79,12 +75,8 @@ export const updateTask = createAsyncThunk(
 export const deleteTask = createAsyncThunk(
     'tasks/deleteTask',
     async (taskId: string) => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tasks/${taskId}`, {
+        const response = await apiRequest(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tasks/${taskId}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': token || '',
-            },
         });
 
         if (!response.ok) {

@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { apiRequest } from '../../utils/apiClient';
 
 export interface Tag {
     tagId: string;
@@ -40,14 +40,10 @@ const initialState: TagState = {
 export const fetchTags = createAsyncThunk(
     'tags/fetchTags',
     async () => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
-        // Ensure Bearer prefix
-        const authHeader = token?.startsWith('Bearer ') ? token : `Bearer ${token}`;
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tags`, {
+        const response = await apiRequest(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tags`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': authHeader || '',
             },
         });
 
@@ -65,20 +61,16 @@ export const fetchNotesByTag = createAsyncThunk(
     'tags/fetchNotesByTag',
     async (tagId: string) => {
         try {
-            const token = await AsyncStorage.getItem(TOKEN_KEY);
-
-            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/query`, {
+            const response = await apiRequest(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/notes/query`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': token || '',
                 },
                 body: JSON.stringify({
                     tagId: tagId,
                     order: 'DESC'
                 }),
             });
-            
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -87,7 +79,6 @@ export const fetchNotesByTag = createAsyncThunk(
             }
 
             const data = await response.json();
-            
 
             const mappedData: Note[] = data.map((item: any) => ({
                 id: item.note_id || item.noteId || item.id,
@@ -110,13 +101,10 @@ export const fetchNotesByTag = createAsyncThunk(
 export const createTag = createAsyncThunk(
     'tags/createTag',
     async (tagData: { name: string; description: string }) => {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
-
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tags`, {
+        const response = await apiRequest(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/tags`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token || '',
             },
             body: JSON.stringify(tagData),
         });

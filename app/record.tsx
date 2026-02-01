@@ -10,16 +10,14 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../constants/colors';
 import { useAppDispatch } from '../store/hooks';
 import { uploadAudioNote } from '../store/slices/noteSlice';
 
-const { width } = Dimensions.get('window');
-const MAX_RECORDING_TIME = 60; // 60 seconds
+const MAX_RECORDING_TIME = 60;
 
-// Wave visualizer based on actual audio amplitude
 const WaveVisualizer = ({ audioRecorder, isRecording }: { audioRecorder: any; isRecording: boolean }) => {
   const bars = 30;
   const [meterLevels, setMeterLevels] = useState<number[]>(Array(bars).fill(0.2));
@@ -57,11 +55,11 @@ const WaveVisualizer = ({ audioRecorder, isRecording }: { audioRecorder: any; is
         }
       }, 100); // Update 10 times per second
     } else {
-      // Reset to baseline when not recording
+      // Reset to baseline when not recording - instant for snappy feel
       animatedValues.forEach((anim, index) => {
         Animated.timing(anim, {
           toValue: 0.2,
-          duration: 200,
+          duration: 0,
           useNativeDriver: true,
         }).start();
       });
@@ -191,8 +189,11 @@ export default function RecordModal() {
 
   const handleDone = async () => {
     try {
+      // Set uploading state first for immediate UI feedback
       setUploading(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+      // Then stop recording
       await audioRecorder.stop();
       const uri = audioRecorder.uri;
 
