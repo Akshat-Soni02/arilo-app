@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "project-x-app",
-    "slug": "project-x-app",
+    "name": "Arilo",
+    "slug": "arilo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -27,7 +27,7 @@
       "package": "com.anonymous.projectxapp",
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"  
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -53,7 +53,7 @@
       [
         "expo-audio",
         {
-          "recordAudioAndroid":true,
+          "recordAudioAndroid": true,
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone to record audio."
         }
       ]
@@ -61,6 +61,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "31da83c8-be8c-43d9-88bd-1210bd56c7e4"
+      }
+    },
+    "owner": "arilo_app"
   }
 }

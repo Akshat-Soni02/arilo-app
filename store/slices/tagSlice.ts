@@ -75,10 +75,10 @@ export const fetchNotesByTag = createAsyncThunk(
                 },
                 body: JSON.stringify({
                     tagId: tagId,
-                    order: 'ASC'
+                    order: 'DESC'
                 }),
             });
-            
+
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -87,7 +87,7 @@ export const fetchNotesByTag = createAsyncThunk(
             }
 
             const data = await response.json();
-            
+
 
             const mappedData: Note[] = data.map((item: any) => ({
                 id: item.note_id || item.noteId || item.id,
