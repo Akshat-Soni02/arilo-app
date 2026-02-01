@@ -72,6 +72,7 @@ export const fetchNotesByTag = createAsyncThunk(
                 }),
             });
 
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('[fetchNotesByTag] Failed with error:', errorText);
@@ -79,6 +80,7 @@ export const fetchNotesByTag = createAsyncThunk(
             }
 
             const data = await response.json();
+
 
             const mappedData: Note[] = data.map((item: any) => ({
                 id: item.note_id || item.noteId || item.id,

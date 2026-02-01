@@ -5,18 +5,34 @@ import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useAppDispatch } from '../../store/hooks';
 import { fetchNoteUsage } from '../../store/slices/noteSlice';
 
 export default function TabLayout() {
 
-
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
     const router = useRouter();
     const { user } = useAuth();
     const dispatch = useAppDispatch();
 
     const handleRecordPress = async () => {
         try {
+            // First, check audio recording permission
+            const { Audio } = await import('expo-av');
+            const permissionResponse = await Audio.requestPermissionsAsync();
+
+            if (!permissionResponse.granted) {
+                Alert.alert(
+                    'Permission Required',
+                    'Microphone access is required to record audio notes. Please enable it in your device settings.',
+                    [{ text: 'OK' }]
+                );
+                return;
+            }
+
+            // Then check usage limits
             const resultAction = await dispatch(fetchNoteUsage());
             if (fetchNoteUsage.fulfilled.match(resultAction)) {
                 const usageData = resultAction.payload;
@@ -28,14 +44,12 @@ export default function TabLayout() {
                     return;
                 }
             }
+
+            // Only navigate if both permission and usage checks pass
             router.push('/record');
         } catch (error) {
-            console.error('Failed to check usage limit:', error);
-            // On error, let them try? Or block? usually let them try or show error.
-            // Let's verify with the prompt "based upon status that show alert".
-            // If fetch fails, we probably shouldn't block, or we should show connection error.
-            // For now, I'll allow it if check fails to avoid blocking valid users on network blip, 
-            // unless strict enforcement is needed. The server will reject upload anyway.
+            console.error('Failed to check permissions or usage limit:', error);
+            // On error, still allow navigation (server will handle validation)
             router.push('/record');
         }
     };
@@ -43,10 +57,10 @@ export default function TabLayout() {
     const MicTabButton = () => (
         <TouchableOpacity
             onPress={handleRecordPress}
-            style={styles.micWrapper}
+            style={[styles.micWrapper]}
             activeOpacity={0.9}
         >
-            <View style={styles.micButton}>
+            <View style={[styles.micButton, { backgroundColor: colors.primary }]}>
                 <Ionicons name="mic" size={30} color="white" />
             </View>
 
@@ -60,15 +74,15 @@ export default function TabLayout() {
                     style={styles.avatar}
                 />
             ) : (
-                <View style={styles.avatarFallback}>
+                <View style={[styles.avatarFallback, { backgroundColor: colors.surface }]}>
                     <Ionicons
                         name="person"
                         size={18}
-                        color={palette.light.text}
+                        color={colors.text}
                     />
                 </View>
             )}
-            <Text style={styles.greeting}>
+            <Text style={[styles.greeting, { color: colors.text }]}>
                 Hi, {user?.name?.split(' ')[0] || 'User'}
             </Text>
         </View>
@@ -78,10 +92,9 @@ export default function TabLayout() {
             <Tabs
                 screenOptions={{
                     headerShown: false,
-                    tabBarStyle: styles.tabBar,
-                    tabBarActiveTintColor: palette.light.primary,
-                    tabBarInactiveTintColor:
-                        palette.light.textMuted,
+                    tabBarStyle: [styles.tabBar, { backgroundColor: colors.surface }],
+                    tabBarActiveTintColor: colors.primary,
+                    tabBarInactiveTintColor: colors.textMuted,
                 }}
             >
                 <Tabs.Screen
@@ -172,7 +185,6 @@ const styles = StyleSheet.create({
     tabBar: {
         height: 70,
         paddingBottom: 10,
-        backgroundColor: '#fff',
         overflow: 'visible', // Ensure the elevated button isn't clipped
     },
     micWrapper: {
@@ -184,7 +196,6 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: palette.light.primary,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -202,7 +213,6 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: palette.light.surface,
         justifyContent: 'center',
         alignItems: 'center',
     },

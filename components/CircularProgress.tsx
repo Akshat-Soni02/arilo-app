@@ -3,6 +3,7 @@ import { TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle } from 'react-native-svg';
 import { palette } from '../constants/colors';
+import { useColorScheme } from '../hooks/use-color-scheme';
 
 interface CircularProgressProps {
     used: number;
@@ -18,6 +19,8 @@ export const CircularProgress = ({
     strokeWidth = 6
 }: CircularProgressProps) => {
     const [showTooltip, setShowTooltip] = useState(false);
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
     const progress = limit > 0 ? Math.min(used / limit, 1) : 0;
@@ -63,7 +66,7 @@ export const CircularProgress = ({
                         position: 'absolute',
                         top: size + 5,
                         right: 0,
-                        backgroundColor: '#2d2d2d',
+                        backgroundColor: colors.text,
                         paddingHorizontal: 10,
                         paddingVertical: 6,
                         borderRadius: 8,
