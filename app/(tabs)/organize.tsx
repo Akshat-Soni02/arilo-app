@@ -97,7 +97,7 @@ export default function Organize() {
                         variant="bodyMedium"
                         className="mt-2 text-center"
                         numberOfLines={2}
-                        style={{ fontFamily: 'EBGaramond-Bold', color: colors.text }}
+                        style={{ fontFamily: 'Montserrat', color: colors.text }}
                     >
                         {tag.name}
                     </Text>

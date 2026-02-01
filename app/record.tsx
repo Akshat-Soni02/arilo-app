@@ -9,7 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../constants/colors';
 import { useColorScheme } from '../hooks/use-color-scheme';
@@ -197,8 +197,7 @@ export default function RecordModal() {
 
       if (uri) {
         // Upload audio note using Redux thunk
-        const result = await dispatch(uploadAudioNote(uri)).unwrap();
-        Alert.alert('Success', 'Audio note uploaded successfully!');
+        await dispatch(uploadAudioNote(uri)).unwrap();
       }
 
       router.back();
@@ -231,20 +230,29 @@ export default function RecordModal() {
         <View className="px-6 pt-4 pb-8 ios:pb-10">
           {/* Handle */}
           <View className="w-10 h-1 self-center rounded-full mb-4" style={{ backgroundColor: colors.border }} />
+          {uploading ? (
+            // Uploading State - Only show loader and text
+            <View className="items-center justify-center py-12">
+              <ActivityIndicator size="large" style={{ color: colors.primary || "#FF9B7A" }} />
+              <Text className="text-xl font-semibold mt-4" style={{ fontFamily: 'Montserrat-SemiBold', color: colors.text }}>
+                Uploading...
+              </Text>
+            </View>
+          ) : (
+            <>  
+               {/* Timer */}
+              <View className="items-center mb-4">
+                <Text className="text-xl font-semibold" style={{ fontFamily: 'Montserrat-SemiBold', color: colors.text }}>
+                  {formatTime(recordingTime)}
+                </Text>
+              </View>
+                
+                {/* Waveform Visualization */}
+              <View className="mb-4">
+                <WaveVisualizer audioRecorder={audioRecorder} isRecording={recorderState.isRecording} colors={colors} />
+              </View>
 
-          {/* Timer */}
-          <View className="items-center mb-4">
-            <Text className="text-xl font-semibold" style={{ fontFamily: 'Montserrat-SemiBold', color: colors.text }}>
-              {formatTime(recordingTime)}
-            </Text>
-          </View>
-
-          {/* Waveform Visualization */}
-          <View className="mb-4">
-            <WaveVisualizer audioRecorder={audioRecorder} isRecording={recorderState.isRecording} colors={colors} />
-          </View>
-
-          {/* Action Buttons */}
+              {/* Action Buttons */}
           <View className="flex-row justify-center items-center gap-16">
             <TouchableOpacity
               className="items-center gap-2"
@@ -272,6 +280,8 @@ export default function RecordModal() {
               </Text>
             </TouchableOpacity>
           </View>
+            </>
+          )}
         </View>
       </View>
     </View>
