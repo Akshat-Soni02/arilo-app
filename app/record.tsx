@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../constants/colors';
+import { useColorScheme } from '../hooks/use-color-scheme';
 import { useAppDispatch } from '../store/hooks';
 import { uploadAudioNote } from '../store/slices/noteSlice';
 
@@ -20,7 +21,7 @@ const { width } = Dimensions.get('window');
 const MAX_RECORDING_TIME = 60; // 60 seconds
 
 // Wave visualizer based on actual audio amplitude
-const WaveVisualizer = ({ audioRecorder, isRecording }: { audioRecorder: any; isRecording: boolean }) => {
+const WaveVisualizer = ({ audioRecorder, isRecording, colors }: { audioRecorder: any; isRecording: boolean; colors: any }) => {
   const bars = 30;
   const [meterLevels, setMeterLevels] = useState<number[]>(Array(bars).fill(0.2));
   const animatedValues = useRef(
@@ -74,7 +75,7 @@ const WaveVisualizer = ({ audioRecorder, isRecording }: { audioRecorder: any; is
 
   return (
     <LinearGradient
-      colors={['#ffffffff', '#ffffffff']}
+      colors={[colors.surface, colors.surface]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       className="w-full h-[100px] rounded-2xl flex-row items-center justify-center gap-1 px-4"
@@ -90,7 +91,7 @@ const WaveVisualizer = ({ audioRecorder, isRecording }: { audioRecorder: any; is
             key={index}
             className="w-1 h-10 rounded-full"
             style={{
-              backgroundColor: palette.light.primary,
+              backgroundColor: colors.primary,
               opacity: 0.6,
               transform: [{ scaleY }],
             }}
@@ -104,6 +105,8 @@ const WaveVisualizer = ({ audioRecorder, isRecording }: { audioRecorder: any; is
 export default function RecordModal() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const colorScheme = useColorScheme();
+  const colors = colorScheme === 'dark' ? palette.dark : palette.light;
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder);
 
@@ -220,29 +223,29 @@ export default function RecordModal() {
         onPress={handleDiscard}
       />
 
-      <View className="bg-[#FEFDFB] rounded-t-3xl overflow-hidden">
+      <View className="rounded-t-3xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
         {/* Linear Progress Bar - at the very top */}
-        <View className="h-1 bg-[#E8E4D9] w-full">
+        <View className="h-1 w-full" style={{ backgroundColor: colors.border }}>
           <View
-            className="h-full bg-[#F07E54]"
-            style={{ width: `${progress}%` }}
+            className="h-full"
+            style={{ backgroundColor: colors.primary, width: `${progress}%` }}
           />
         </View>
 
         <View className="px-6 pt-4 pb-8 ios:pb-10">
           {/* Handle */}
-          <View className="w-10 h-1 bg-[#E8E4D9] self-center rounded-full mb-4" />
+          <View className="w-10 h-1 self-center rounded-full mb-4" style={{ backgroundColor: colors.border }} />
 
           {/* Timer */}
           <View className="items-center mb-4">
-            <Text className="text-xl font-semibold text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-SemiBold' }}>
+            <Text className="text-xl font-semibold" style={{ fontFamily: 'Montserrat-SemiBold', color: colors.text }}>
               {formatTime(recordingTime)}
             </Text>
           </View>
 
           {/* Waveform Visualization */}
           <View className="mb-4">
-            <WaveVisualizer audioRecorder={audioRecorder} isRecording={recorderState.isRecording} />
+            <WaveVisualizer audioRecorder={audioRecorder} isRecording={recorderState.isRecording} colors={colors} />
           </View>
 
           {/* Action Buttons */}
@@ -252,10 +255,10 @@ export default function RecordModal() {
               onPress={handleDiscard}
               activeOpacity={0.7}
             >
-              <View className="w-16 h-16 rounded-full bg-[#FEFDFB] border-[1.5px] border-[#E8E4D9] justify-center items-center shadow-sm">
-                <Ionicons name="close" size={24} color="#2d2d2d" />
+              <View className="w-16 h-16 rounded-full border-[1.5px] justify-center items-center shadow-sm" style={{ backgroundColor: colors.surface, borderColor: colors.border }}>
+                <Ionicons name="close" size={24} color={colors.text} />
               </View>
-              <Text className="text-xs text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
+              <Text className="text-xs" style={{ fontFamily: 'Montserrat-Medium', color: colors.text }}>
                 Discard
               </Text>
             </TouchableOpacity>
@@ -265,10 +268,10 @@ export default function RecordModal() {
               onPress={handleDone}
               activeOpacity={0.7}
             >
-              <View className="w-16 h-16 rounded-full bg-[#F07E54] justify-center items-center shadow-sm">
+              <View className="w-16 h-16 rounded-full justify-center items-center shadow-sm" style={{ backgroundColor: colors.primary }}>
                 <Ionicons name="checkmark" size={24} color="white" />
               </View>
-              <Text className="text-xs text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
+              <Text className="text-xs" style={{ fontFamily: 'Montserrat-Medium', color: colors.text }}>
                 Done
               </Text>
             </TouchableOpacity>

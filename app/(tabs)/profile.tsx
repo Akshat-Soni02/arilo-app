@@ -8,8 +8,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import icon from '../../assets/images/logo.png';
 import { handleGoogleSignOut } from '../../components/button/GoogleButton';
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
+import ThemeSelector from '../../components/ThemeSelector';
 import { palette } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchNoteUsage } from '../../store/slices/noteSlice';
 
@@ -18,6 +20,8 @@ export default function Profile() {
     const { user, logout } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
 
     const dispatch = useAppDispatch();
     const { usage } = useAppSelector((state) => state.notes);
@@ -40,7 +44,7 @@ export default function Profile() {
         Linking.openURL('mailto:info@arilo.in');
     };
 
-    const SettingItem = ({ icon, label, onPress, rightContent, color = "#2d2d2d", iconBg = "#f3f4f6" }: {
+    const SettingItem = ({ icon, label, onPress, rightContent, color, iconBg }: {
         icon: string,
         label: string,
         onPress?: () => void,
@@ -51,20 +55,21 @@ export default function Profile() {
         <TouchableOpacity
             onPress={onPress}
             activeOpacity={0.7}
-            className="flex-row items-center justify-between py-4 border-b border-gray-50"
+            className="flex-row items-center justify-between py-4 border-b"
+            style={{ borderColor: colors.border }}
         >
             <View className="flex-row items-center flex-1">
                 <View
                     className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: iconBg }}
+                    style={{ backgroundColor: iconBg || colors.iconBg }}
                 >
-                    <Ionicons name={icon as any} size={20} color={color} />
+                    <Ionicons name={icon as any} size={20} color={color || colors.text} />
                 </View>
-                <Text className="text-base font-medium text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Medium' }}>
+                <Text className="text-base font-medium" style={{ fontFamily: 'Montserrat-Medium', color: colors.text }}>
                     {label}
                 </Text>
             </View>
-            {rightContent || <Ionicons name="chevron-forward" size={18} color="#9ca3af" />}
+            {rightContent || <Ionicons name="chevron-forward" size={18} color={colors.chevronColor} />}
         </TouchableOpacity>
     );
 
@@ -74,22 +79,22 @@ export default function Profile() {
             style={{
                 width: '48%',
                 borderRadius: 16,
-                backgroundColor: 'white',
+                backgroundColor: colors.surface,
                 borderWidth: 1,
-                borderColor: '#f3f4f6',
+                borderColor: colors.border,
                 padding: 16,
             }}
         >
             <View className="mb-3">
-                <Ionicons name={icon as any} size={24} color={palette.light.primary} />
+                <Ionicons name={icon as any} size={24} color={colors.primary} />
             </View>
-            <Text className="text-xs text-gray-500 mb-1" style={{ fontFamily: 'Montserrat' }}>{label}</Text>
-            <Text className="text-lg font-bold text-[#2d2d2d]" style={{ fontFamily: 'Montserrat-Bold' }}>{value}</Text>
+            <Text className="text-xs mb-1" style={{ fontFamily: 'Montserrat', color: colors.textMuted }}>{label}</Text>
+            <Text className="text-lg font-bold" style={{ fontFamily: 'Montserrat-Bold', color: colors.text }}>{value}</Text>
         </Surface>
     );
 
     return (
-        <SafeAreaWrapper className="flex-1 bg-white">
+        <SafeAreaWrapper className="flex-1" style={{ backgroundColor: colors.background }}>
             <ScrollView
                 className="flex-1"
                 contentContainerStyle={{ padding: 24, paddingBottom: insets.bottom + 20 }}
@@ -105,22 +110,22 @@ export default function Profile() {
                                     className="w-20 h-20 rounded-full bg-gray-100"
                                 />
                             ) : (
-                                <View className="w-20 h-20 rounded-full bg-[#f3f4f6] items-center justify-center">
-                                    <Ionicons name="person" size={32} color="#9ca3af" />
+                                <View className="w-20 h-20 rounded-full items-center justify-center" style={{ backgroundColor: colors.iconBg }}>
+                                    <Ionicons name="person" size={32} color={colors.gray400} />
                                 </View>
                             )}
                         </View>
                         <View>
-                            <Text className="text-xl font-bold text-[#2d2d2d] mb-1" style={{ fontFamily: 'Montserrat-Bold' }}>
+                            <Text className="text-xl font-bold mb-1" style={{ fontFamily: 'Montserrat-Bold', color: colors.text }}>
                                 {user?.name || 'User'}
                             </Text>
-                            <Text className="text-sm text-gray-400" style={{ fontFamily: 'Montserrat' }}>
+                            <Text className="text-sm" style={{ fontFamily: 'Montserrat', color: colors.textMuted }}>
                                 {user?.email || 'Email not available'}
                             </Text>
                         </View>
                     </View>
                     <TouchableOpacity className="p-2">
-                        <Ionicons name="pencil-outline" size={20} color="#2d2d2d" />
+                        <Ionicons name="pencil-outline" size={20} color={colors.text} />
                     </TouchableOpacity>
                 </View>
 
@@ -158,26 +163,36 @@ export default function Profile() {
 
                 {/* Usage Section */}
                 <View className="mb-8">
-                    <Text className="text-lg font-bold text-[#2d2d2d] mb-4" style={{ fontFamily: 'Montserrat-Bold' }}>
+                    <Text className="text-lg font-bold mb-4" style={{ fontFamily: 'Montserrat-Bold', color: colors.text }}>
                         Usage & Limits
                     </Text>
                     <View className="flex-row justify-between">
                         <InfoCard
                             icon="calendar-outline"
                             label="Daily Note Limit"
-                            value={usage ? `${usage.dailyUsed}/${usage.dailyLimit}` : '0/0'}
+                            value={usage ? `${usage.dailyUsed}/${usage.dailyLimit == -1 ? 'Unlimited' : usage.dailyLimit}` : '0/0'}
                         />
                         <InfoCard
                             icon="layers-outline"
                             label="Monthly Note Limit"
-                            value={usage ? `${usage.monthlyUsed}/${usage.monthlyLimit}` : '0/0'}
+                            value={usage ? `${usage.monthlyUsed}/${usage.monthlyLimit == -1 ? 'Unlimited' : usage.monthlyLimit}` : '0/0'}
                         />
                     </View>
                 </View>
 
+                {/* Appearance Section */}
+                <View className="mb-8">
+                    <Text className="text-lg font-bold mb-2" style={{ fontFamily: 'Montserrat-Bold', color: colors.text }}>
+                        Appearance
+                    </Text>
+                    <Surface elevation={0} style={{ borderRadius: 16, backgroundColor: 'transparent' }}>
+                        <ThemeSelector />
+                    </Surface>
+                </View>
+
                 {/* Support Section */}
                 <View className="mb-8">
-                    <Text className="text-lg font-bold text-[#2d2d2d] mb-2" style={{ fontFamily: 'Montserrat-Bold' }}>
+                    <Text className="text-lg font-bold mb-2" style={{ fontFamily: 'Montserrat-Bold', color: colors.text }}>
                         Support
                     </Text>
                     <Surface elevation={0} style={{ borderRadius: 16, backgroundColor: 'transparent' }}>
@@ -200,7 +215,7 @@ export default function Profile() {
 
                 {/* More Section */}
                 <View className="mb-8">
-                    <Text className="text-lg font-bold text-[#2d2d2d] mb-2" style={{ fontFamily: 'Montserrat-Bold' }}>
+                    <Text className="text-lg font-bold mb-2" style={{ fontFamily: 'Montserrat-Bold', color: colors.text }}>
                         More
                     </Text>
                     <Surface elevation={0} style={{ borderRadius: 16, backgroundColor: 'transparent' }}>
@@ -218,7 +233,7 @@ export default function Profile() {
                 {/* Version Info */}
                 <View className="mt-4">
                     <Image source={icon} className="w-10 h-10" />
-                    <Text className="text-xs text-gray-300 mt-1" style={{ fontFamily: 'Montserrat' }}>v1.0.0</Text>
+                    <Text className="text-xs mt-1" style={{ fontFamily: 'Montserrat', color: colors.textMuted }}>v1.0.0</Text>
                 </View>
             </ScrollView>
         </SafeAreaWrapper>

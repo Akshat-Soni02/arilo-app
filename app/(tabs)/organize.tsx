@@ -6,10 +6,13 @@ import { Text } from 'react-native-paper';
 
 import SafeAreaWrapper from '../../components/safe-area-wrapper';
 import { palette } from '../../constants/colors';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { createTag, fetchTags, Tag } from '../../store/slices/tagSlice';
 
 export default function Organize() {
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
     const dispatch = useAppDispatch();
     const { tags, loading, error } = useAppSelector((state) => state.tags);
     const [searchQuery, setSearchQuery] = useState('');
@@ -58,16 +61,16 @@ export default function Organize() {
         if ('isAddButton' in item) {
             return (
                 <TouchableOpacity
-                    className="rounded-2xl mt-6 ml-6 flex-1 items-center justify-center border-2 border-dashed border-gray-300"
-                    style={{ minWidth: '20%', maxWidth: '25%', aspectRatio: 1 }}
+                    className="rounded-2xl mt-6 ml-6 flex-1 items-center justify-center border-2 border-dashed"
+                    style={{ minWidth: '20%', maxWidth: '25%', aspectRatio: 1, borderColor: colors.gray300 }}
                     activeOpacity={0.7}
                     onPress={() => setIsModalVisible(true)}
                 >
-                    <Ionicons name="add-circle-outline" size={32} color={palette.light.primary} />
+                    <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
                     <Text
                         variant="bodyMedium"
-                        className="text-gray-500 mt-1 text-center"
-                        style={{ fontFamily: 'EBGaramond-Bold' }}
+                        className="mt-1 text-center"
+                        style={{ fontFamily: 'EBGaramond-Bold', color: colors.textMuted }}
                     >
                         Create
                     </Text>
@@ -87,14 +90,14 @@ export default function Organize() {
             >
                 <View className="items-center">
                     {/* Folder Icon */}
-                    <Ionicons name="folder-open" size={40} color={palette.light.primary} />
+                    <Ionicons name="folder-open" size={40} color={colors.primary} />
 
                     {/* Tag Name */}
                     <Text
                         variant="bodyMedium"
-                        className="text-gray-800 mt-2 text-center"
+                        className="mt-2 text-center"
                         numberOfLines={2}
-                        style={{ fontFamily: 'EBGaramond-Bold' }}
+                        style={{ fontFamily: 'EBGaramond-Bold', color: colors.text }}
                     >
                         {tag.name}
                     </Text>
@@ -105,11 +108,11 @@ export default function Organize() {
 
     const renderEmptyState = () => (
         <View className="flex-1 items-center justify-center py-12">
-            <Ionicons name="folder-open-outline" size={64} color="#9CA3AF" />
-            <Text variant="titleMedium" className="text-gray-500 mt-4" style={{ fontFamily: 'EBGaramond-Bold' }}>
+            <Ionicons name="folder-open-outline" size={64} color={colors.gray400} />
+            <Text variant="titleMedium" className="mt-4" style={{ fontFamily: 'EBGaramond-Bold', color: colors.textMuted }}>
                 No tags found
             </Text>
-            <Text variant="bodyMedium" className="text-gray-400 mt-2 text-center px-8" style={{ fontFamily: 'EBGaramond' }}>
+            <Text variant="bodyMedium" className="mt-2 text-center px-8" style={{ fontFamily: 'EBGaramond', color: colors.textMuted }}>
                 {searchQuery
                     ? 'Try a different search term'
                     : 'Create your first tag to organize your tasks'}
@@ -118,11 +121,11 @@ export default function Organize() {
     );
 
     return (
-        <SafeAreaWrapper className="flex-1 bg-gray-50" edges={['top']}>
+        <SafeAreaWrapper className="flex-1" edges={['top']} style={{ backgroundColor: colors.background }}>
             {/* Header */}
             <View className="px-6 py-6 mt-12">
                 <View className="items-start">
-                    <Text variant="headlineMedium" className="text-gray-800 mb-1" style={{ fontFamily: 'EBGaramond-Bold' }}>
+                    <Text variant="headlineMedium" className="mb-1" style={{ fontFamily: 'EBGaramond-Bold', color: colors.text }}>
                         Your Memories
                     </Text>
                 </View>
@@ -130,25 +133,25 @@ export default function Organize() {
 
             {/* Search Bar */}
             <View className="px-4 py-3">
-                <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
+                <View className="flex-row items-center rounded-xl px-4 py-3" style={{ backgroundColor: colors.gray100 }}>
                     <TextInput
                         placeholder="Are you looking for something?"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        className="flex-1 ml-2 text-gray-800"
-                        placeholderTextColor="#9CA3AF"
-                        style={{ fontFamily: 'EBGaramond' }}
+                        className="flex-1 ml-2"
+                        placeholderTextColor={colors.placeholderText}
+                        style={{ fontFamily: 'EBGaramond', color: colors.text }}
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+                            <Ionicons name="close-circle" size={20} color={colors.gray400} />
                         </TouchableOpacity>
                     )}
                     <View
                         className="ml-2 p-2 rounded-lg"
-                        style={{ backgroundColor: palette.dark.primary }}
+                        style={{ backgroundColor: colors.primary }}
                     >
-                        <Ionicons name="search" size={20} color={palette.dark.text} />
+                        <Ionicons name="search" size={20} color="white" />
                     </View>
                 </View>
             </View>
@@ -156,26 +159,27 @@ export default function Organize() {
             {/* Content */}
             {error ? (
                 <View className="flex-1 items-center justify-center px-8">
-                    <Ionicons name="alert-circle" size={64} color="#EF4444" />
-                    <Text variant="titleMedium" className="text-gray-800 mt-4 text-center">
+                    <Ionicons name="alert-circle" size={64} color={colors.error} />
+                    <Text variant="titleMedium" className="mt-4 text-center" style={{ color: colors.text }}>
                         Failed to load tags
                     </Text>
-                    <Text variant="bodyMedium" className="text-gray-500 mt-2 text-center">
+                    <Text variant="bodyMedium" className="mt-2 text-center" style={{ color: colors.textMuted }}>
                         {error}
                     </Text>
                     <TouchableOpacity
                         onPress={loadTags}
-                        className="mt-6 bg-orange-500 px-6 py-3 rounded-xl"
+                        className="mt-6 px-6 py-3 rounded-xl"
+                        style={{ backgroundColor: colors.primary }}
                     >
-                        <Text variant="bodyLarge" className="text-white font-medium">
+                        <Text variant="bodyLarge" className="font-medium" style={{ color: 'white' }}>
                             Try Again
                         </Text>
                     </TouchableOpacity>
                 </View>
             ) : loading ? (
                 <View className="flex-1 items-center justify-center">
-                    <ActivityIndicator size="large" color="#F97316" />
-                    <Text variant="bodyMedium" className="text-gray-500 mt-4">
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text variant="bodyMedium" className="mt-4" style={{ color: colors.textMuted }}>
                         Loading tags...
                     </Text>
                 </View>
@@ -207,26 +211,27 @@ export default function Organize() {
                 onRequestClose={() => setIsModalVisible(false)}
             >
                 <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <View className="bg-white rounded-3xl p-6 mx-6 w-11/12 max-w-md">
+                    <View className="rounded-3xl p-6 mx-6 w-11/12 max-w-md" style={{ backgroundColor: colors.surface }}>
                         {/* Modal Header */}
                         <View className="flex-row items-center justify-between mb-4">
-                            <Text variant="headlineSmall" className="text-gray-800 font-bold">
+                            <Text variant="headlineSmall" className="font-bold" style={{ color: colors.text }}>
                                 Create New Tag
                             </Text>
                             <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                                <Ionicons name="close" size={28} color="#6B7280" />
+                                <Ionicons name="close" size={28} color={colors.gray500} />
                             </TouchableOpacity>
                         </View>
 
                         {/* Tag Name Input */}
                         <View className="mb-4">
-                            <Text variant="bodyMedium" className="text-gray-700 mb-2 font-medium">
+                            <Text variant="bodyMedium" className="mb-2 font-medium" style={{ color: colors.text }}>
                                 Tag Name *
                             </Text>
                             <TextInput
-                                className="bg-gray-100 rounded-xl px-4 py-3 text-gray-800"
+                                className="rounded-xl px-4 py-3"
+                                style={{ backgroundColor: colors.gray100, color: colors.text }}
                                 placeholder="Enter tag name"
-                                placeholderTextColor="#9CA3AF"
+                                placeholderTextColor={colors.placeholderText}
                                 value={newTagName}
                                 onChangeText={setNewTagName}
                                 autoFocus={true}
@@ -235,13 +240,14 @@ export default function Organize() {
 
                         {/* Tag Description Input */}
                         <View className="mb-6">
-                            <Text variant="bodyMedium" className="text-gray-700 mb-2 font-medium">
+                            <Text variant="bodyMedium" className="mb-2 font-medium" style={{ color: colors.text }}>
                                 Description
                             </Text>
                             <TextInput
-                                className="bg-gray-100 rounded-xl px-4 py-3 text-gray-800"
+                                className="rounded-xl px-4 py-3"
+                                style={{ backgroundColor: colors.gray100, color: colors.text }}
                                 placeholder="Enter description (optional)"
-                                placeholderTextColor="#9CA3AF"
+                                placeholderTextColor={colors.placeholderText}
                                 value={newTagDescription}
                                 onChangeText={setNewTagDescription}
                                 multiline={true}
@@ -253,7 +259,8 @@ export default function Organize() {
                         {/* Action Buttons */}
                         <View className="flex-row gap-3">
                             <TouchableOpacity
-                                className="flex-1 bg-gray-200 rounded-xl py-3 items-center"
+                                className="flex-1 rounded-xl py-3 items-center"
+                                style={{ backgroundColor: colors.gray200 }}
                                 onPress={() => {
                                     setIsModalVisible(false);
                                     setNewTagName('');
@@ -261,18 +268,18 @@ export default function Organize() {
                                 }}
                                 activeOpacity={0.7}
                             >
-                                <Text variant="bodyLarge" className="text-gray-700 font-medium">
+                                <Text variant="bodyLarge" className="font-medium" style={{ color: colors.text }}>
                                     Cancel
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 className="flex-1 rounded-xl py-3 items-center"
-                                style={{ backgroundColor: palette.light.primary }}
+                                style={{ backgroundColor: colors.primary }}
                                 onPress={handleCreateTag}
                                 activeOpacity={0.7}
                                 disabled={!newTagName.trim()}
                             >
-                                <Text variant="bodyLarge" className="text-white font-medium">
+                                <Text variant="bodyLarge" className="font-medium" style={{ color: 'white' }}>
                                     Create
                                 </Text>
                             </TouchableOpacity>

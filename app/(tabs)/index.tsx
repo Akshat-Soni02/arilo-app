@@ -6,11 +6,13 @@ import { CircularProgress } from '../../components/CircularProgress';
 import SafeAreaWrapper from "../../components/safe-area-wrapper";
 import { SkeletonNoteCard } from '../../components/SkeletonNoteCard';
 import { palette } from '../../constants/colors';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchNotes, fetchNoteUsage, markNoteAsFailed, pollNoteStatus } from '../../store/slices/noteSlice';
 export default function HomeScreen() {
 
-
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
     const dispatch = useAppDispatch();
     const { notes, loading, error, usage } = useAppSelector((state) => state.notes);
     const [refreshing, setRefreshing] = useState(false);
@@ -94,7 +96,8 @@ export default function HomeScreen() {
             return <SkeletonNoteCard note={note} />;
         }
         return (
-            <View className="bg-white rounded-3xl overflow-hidden" style={{
+            <View className="rounded-3xl overflow-hidden" style={{
+                backgroundColor: colors.surface,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.08,
@@ -104,18 +107,18 @@ export default function HomeScreen() {
                 {/* User Message */}
                 <View className="p-5">
                     <View className="flex-row items-center mb-3">
-                        <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: palette.light.primary + '20' }}>
-                            <Ionicons name="mic" size={16} color={palette.light.primary} />
+                        <View className="w-8 h-8 rounded-full items-center justify-center mr-3" style={{ backgroundColor: colors.primary + '20' }}>
+                            <Ionicons name="mic" size={16} color={colors.primary} />
                         </View>
                     </View>
-                    <Text variant="bodyLarge" className="text-gray-800 leading-6 mb-2">
+                    <Text variant="bodyLarge" className="leading-6 mb-2" style={{ color: colors.text }}>
                         {note.stt || 'No transcription available'}
                     </Text>
                     <View className="flex-row items-center justify-between mt-2">
-                        <Text variant="bodySmall" className="text-gray-400">
+                        <Text variant="bodySmall" style={{ color: colors.textMuted }}>
                             {formatDate(note.createdAt)}
                         </Text>
-                        <Text variant="bodySmall" className="text-gray-400">
+                        <Text variant="bodySmall" style={{ color: colors.textMuted }}>
                             {formatTime(note.createdAt)}
                         </Text>
                     </View>
@@ -124,14 +127,14 @@ export default function HomeScreen() {
                 {/* AI Summary */}
                 {note.noteback && (
                     <View className="px-5 pb-5">
-                        <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
+                        <View className="rounded-2xl p-4" style={{ backgroundColor: colors.warningBg }}>
                             <View className="flex-row items-center mb-2">
-                                <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
-                                <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
+                                <Ionicons name="sparkles" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                                <Text variant="bodySmall" className="font-semibold" style={{ color: colors.primary }}>
                                     Arilo says:
                                 </Text>
                             </View>
-                            <Text variant="bodyMedium" className="text-gray-700 leading-5">
+                            <Text variant="bodyMedium" className="leading-5" style={{ color: colors.text }}>
                                 {note.noteback}
                             </Text>
                         </View>
@@ -143,13 +146,13 @@ export default function HomeScreen() {
 
     const renderEmptyState = () => (
         <View className="flex-1 items-center justify-center py-20">
-            <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: palette.light.primary + '15' }}>
-                <Ionicons name="mic-outline" size={40} color={palette.light.primary} />
+            <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: colors.primary + '15' }}>
+                <Ionicons name="mic-outline" size={40} color={colors.primary} />
             </View>
-            <Text variant="titleMedium" className="text-gray-800 font-bold mb-2">
+            <Text variant="titleMedium" className="font-bold mb-2" style={{ color: colors.text }}>
                 No notes yet
             </Text>
-            <Text variant="bodyMedium" className="text-gray-500 text-center px-8">
+            <Text variant="bodyMedium" className="text-center px-8" style={{ color: colors.textMuted }}>
                 Start recording to capture your thoughts and ideas
             </Text>
         </View>
@@ -157,21 +160,21 @@ export default function HomeScreen() {
 
     const renderErrorState = () => (
         <View className="flex-1 items-center justify-center px-8">
-            <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: '#FEE2E2' }}>
-                <Ionicons name="alert-circle" size={40} color="#EF4444" />
+            <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: colors.errorBg }}>
+                <Ionicons name="alert-circle" size={40} color={colors.error} />
             </View>
-            <Text variant="titleMedium" className="text-gray-800 font-bold mb-2 text-center">
+            <Text variant="titleMedium" className="font-bold mb-2 text-center" style={{ color: colors.text }}>
                 Failed to load notes
             </Text>
-            <Text variant="bodyMedium" className="text-gray-500 mb-6 text-center">
+            <Text variant="bodyMedium" className="mb-6 text-center" style={{ color: colors.textMuted }}>
                 {error}
             </Text>
             <TouchableOpacity
                 onPress={loadNotes}
                 className="px-8 py-4 rounded-2xl"
-                style={{ backgroundColor: palette.light.primary }}
+                style={{ backgroundColor: colors.primary }}
             >
-                <Text variant="bodyLarge" className="text-white font-semibold">
+                <Text variant="bodyLarge" className="font-semibold" style={{ color: 'white' }}>
                     Try Again
                 </Text>
             </TouchableOpacity>
@@ -179,12 +182,12 @@ export default function HomeScreen() {
     );
 
     return (
-        <SafeAreaWrapper className="flex-1" edges={['top']}>
+        <SafeAreaWrapper className="flex-1" edges={['top']} style={{ backgroundColor: colors.background }}>
             <View className="px-6">
                 <View className="flex-row items-center justify-between mb-4">
                     <View className="flex-row items-center">
-                        <View className="px-4 py-2 rounded-full" style={{ backgroundColor: palette.light.primary + '15' }}>
-                            <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary, fontFamily: 'Inter_600SemiBold' }}>
+                        <View className="px-4 py-2 rounded-full" style={{ backgroundColor: colors.primary + '15' }}>
+                            <Text variant="bodySmall" className="font-semibold" style={{ color: colors.primary, fontFamily: 'Inter_600SemiBold' }}>
                                 {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </Text>
                         </View>
@@ -196,10 +199,10 @@ export default function HomeScreen() {
                 </View>
 
                 <View className="flex-col items-center justify-center">
-                    <Text variant="headlineMedium" className="text-gray-800 font-bold mb-1 text-center" style={{ fontFamily: 'EBGaramond-Bold' }}>
+                    <Text variant="headlineMedium" className="font-bold mb-1 text-center" style={{ fontFamily: 'EBGaramond-Bold', color: colors.text }}>
                         Your Notes
                     </Text>
-                    <Text variant="bodyMedium" className="text-gray-500 text-center">
+                    <Text variant="bodyMedium" className="text-center" style={{ color: colors.textMuted }}>
                         {displayedNotes.length} {displayedNotes.length === 1 ? 'note' : 'notes'} captured
                     </Text>
                 </View>
@@ -208,8 +211,8 @@ export default function HomeScreen() {
                 renderErrorState()
             ) : loading && displayedNotes.length === 0 ? (
                 <View className="flex-1 items-center justify-center">
-                    <ActivityIndicator size="large" color={palette.light.primary} />
-                    <Text variant="bodyMedium" className="text-gray-500 mt-4">
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text variant="bodyMedium" className="mt-4" style={{ color: colors.textMuted }}>
                         Loading notes...
                     </Text>
                 </View>
@@ -219,7 +222,7 @@ export default function HomeScreen() {
                     contentContainerStyle={{ paddingTop: 8, paddingBottom: 120, flexGrow: 1 }}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[palette.light.primary]} />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
                     }
                 >
                     {displayedNotes.length === 0 ? (

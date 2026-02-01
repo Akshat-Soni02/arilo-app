@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { palette } from '../constants/colors';
+import { useColorScheme } from '../hooks/use-color-scheme';
 
 const LOADING_MESSAGES = [
     "Analyzing content...",
@@ -19,6 +20,8 @@ interface SkeletonNoteCardProps {
 
 export const SkeletonNoteCard = ({ note }: SkeletonNoteCardProps) => {
     const [messageIndex, setMessageIndex] = useState(0);
+    const colorScheme = useColorScheme();
+    const colors = colorScheme === 'dark' ? palette.dark : palette.light;
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -62,7 +65,7 @@ export const SkeletonNoteCard = ({ note }: SkeletonNoteCardProps) => {
 
                     {/* Arilo Message Area - Show Noteback if available, else Loading Message */}
                     {note?.noteback ? (
-                        <View className="rounded-2xl p-4" style={{ backgroundColor: '#FFF7ED' }}>
+                        <View className="rounded-2xl p-4" style={{ backgroundColor: colors.warningBg }}>
                             <View className="flex-row items-center mb-2">
                                 <Ionicons name="sparkles" size={16} color={palette.light.primary} style={{ marginRight: 6 }} />
                                 <Text variant="bodySmall" className="font-semibold" style={{ color: palette.light.primary }}>
